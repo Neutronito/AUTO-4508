@@ -1,0 +1,2 @@
+joy:joystick_drivers:rosaria
+-DCATKIN_DEVEL_PREFIX=/home/group2/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/group2/catkin_ws/install -G Unix Makefiles
