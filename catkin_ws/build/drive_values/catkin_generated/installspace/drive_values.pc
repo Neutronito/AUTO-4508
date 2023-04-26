@@ -1,0 +1,8 @@
+prefix=/home/group2/catkin_ws/install
+
+Name: drive_values
+Description: Description of drive_values
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
