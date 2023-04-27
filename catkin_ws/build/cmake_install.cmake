@@ -131,10 +131,8 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/group2/catkin_ws/build/gtest/cmake_install.cmake")
-  include("/home/group2/catkin_ws/build/joystick_drivers/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/drive_values/cmake_install.cmake")
-  include("/home/group2/catkin_ws/build/joy/cmake_install.cmake")
-  include("/home/group2/catkin_ws/build/ps3joy/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/global_controller/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/rosaria/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/learning_joy/cmake_install.cmake")
 

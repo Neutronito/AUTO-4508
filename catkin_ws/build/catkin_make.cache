@@ -1,2 +1,2 @@
-drive_values:joy:joystick_drivers:learning_joy:ps3joy:rosaria
+drive_values:global_controller:learning_joy:rosaria
 -DCATKIN_DEVEL_PREFIX=/home/group2/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/group2/catkin_ws/install -G Unix Makefiles

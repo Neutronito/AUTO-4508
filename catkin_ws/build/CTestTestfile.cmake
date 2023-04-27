@@ -5,9 +5,7 @@
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("gtest")
-subdirs("joystick_drivers")
 subdirs("drive_values")
-subdirs("joy")
-subdirs("ps3joy")
+subdirs("global_controller")
 subdirs("rosaria")
 subdirs("learning_joy")
