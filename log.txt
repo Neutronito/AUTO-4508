@@ -1,0 +1,28 @@
+### GITHUB Notes ###
+Use "git checkout {branchName}" to change to the desired branch
+Use "git branch" to check the current branch
+Use "git pull" before doing anything to ensure the repository is up to date
+
+After applying changes, use "git add ." to stage all changes
+Then use "git commit -m "{commit message}"" to commit to the local branch
+Then use "git push" to push your local changes to the origin respository
+
+### Task 8, PS3 Remote Control Logs ### 2023-04-26
+Using the learning_joy pkg to read the PS3 remote values, which publishes to the joy topic
+
+Using drive_values pkg to parse remote values, which is subscribed to joy and publishes to
+RosAria/cmd_vel
+
+Using rosaria to drive the pioneer based off the twist msgs published by drive_values, subscribed
+to RosAria/cmd_vel
+
+
+## Created a launch file to run everything nicely. Key points are: ##
+
+set joy autorepeat_rate to 60Hz
+
+set rosaria port to be on ttyS1
+
+set drive value axis, axis_linear and axis_angular is used so that the program knows which array 
+index corresponds to that axis, and scale_linear and scale_angular are used to multiply the 
+array values by some factor
