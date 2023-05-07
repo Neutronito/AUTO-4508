@@ -1,0 +1,21 @@
+<launch>
+    <!-- Nodes -->
+
+    <node name="joy_node" pkg="joy" type="joy_node">
+        <param name="autorepeat_rate" value="60" type="double"/>
+    </node>
+    
+    <node name="drive_values" pkg="drive_values" type="drive_values"/>
+    
+    <node name="RosAria" pkg="rosaria" type="RosAria" args="_port:=/dev/ttyS1"/>
+
+    <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/waypoints.txt" output="screen"/> 
+
+    <node name="waypoint_driver_node" pkg="waypoint_driver" type="waypoint_driver_node" output="log"/>
+
+    <!-- Axes -->
+    <param name="axis_linear" value="1" type="int"/>
+    <param name="axis_angular" value="0" type="int"/>
+    <param name="scale_linear" value="0.5" type="double"/>
+    <param name="scale_angular" value="0.5" type="double"/>
+</launch>

@@ -17,17 +17,36 @@
 //The directory containing a CMake configuration file for Aria.
 Aria_DIR:PATH=Aria_DIR-NOTFOUND
 
+//Build debug target (ON) or release (OFF)
+BUILD_DEBUG_TARGET:BOOL=OFF
+
 //Builds the googlemock subproject
 BUILD_GMOCK:BOOL=ON
 
+//Build sick_scan library with function hiding except for SickScanApi-functions
+// (ON) or without function hiding (OFF)
+BUILD_LIB_HIDE_FUNCTIONS:BOOL=OFF
+
 //Build dynamically-linked binaries
 BUILD_SHARED_LIBS:BOOL=ON
+
+//Build sick_scan with LDMRS support (ON, libsick_ldmrs from https://github.com/SICKAG/libsick_ldmrs
+// required) or without LDMRS support (OFF)
+BUILD_WITH_LDMRS_SUPPORT:BOOL=ON
+
+//Build sick_scan with SCANSEGMENT_XD support (ON) or without SCANSEGMENT_XD
+// support (OFF)
+BUILD_WITH_SCANSEGMENT_XD_SUPPORT:BOOL=ON
 
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Boost-1.71.0
 
 //Path to a file.
 Boost_INCLUDE_DIR:PATH=/usr/include
+
+Boost_SERIALIZATION_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_serialization.so.1.71.0
+
+Boost_SYSTEM_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0
 
 Boost_THREAD_LIBRARY_RELEASE:STRING=/usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0
 
@@ -317,6 +336,10 @@ EMPY_EXECUTABLE:FILEPATH=EMPY_EXECUTABLE-NOTFOUND
 //Empy script
 EMPY_SCRIPT:STRING=/usr/lib/python3/dist-packages/em.py
 
+//Build emulator for offline and unittests (ON) or without emulator
+// (OFF)
+ENABLE_EMULATOR:BOOL=OFF
+
 //The directory containing a CMake configuration file for GMock.
 GMock_DIR:PATH=GMock_DIR-NOTFOUND
 
@@ -372,6 +395,15 @@ Project_BINARY_DIR:STATIC=/home/group2/catkin_ws/build
 //Value Computed by CMake
 Project_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src
 
+//The directory containing a CMake configuration file for Qt5Core.
+Qt5Core_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Core
+
+//The directory containing a CMake configuration file for Qt5Gui.
+Qt5Gui_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Gui
+
+//The directory containing a CMake configuration file for Qt5Widgets.
+Qt5Widgets_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/Qt5Widgets
+
 //Path to a library.
 RT_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/librt.so
 
@@ -380,6 +412,9 @@ SETUPTOOLS_DEB_LAYOUT:BOOL=ON
 
 //Name of the computer/site where compile is being run
 SITE:STRING=netipc-desktop
+
+//The directory containing a CMake configuration file for SickLDMRS.
+SickLDMRS_DIR:PATH=SickLDMRS_DIR-NOTFOUND
 
 //LSB Distrib tag
 UBUNTU:BOOL=TRUE
@@ -399,11 +434,20 @@ _gtest_INCLUDES:FILEPATH=/usr/include/gtest/gtest.h
 //Path to a file.
 _gtest_SOURCES:FILEPATH=/usr/src/gtest/src/gtest.cc
 
+//Path to a file.
+_path_name:FILEPATH=/home/group2/catkin_ws/src/user_interface/rqt_py_common/test
+
 //The directory containing a CMake configuration file for actionlib.
 actionlib_DIR:PATH=/opt/ros/noetic/share/actionlib/cmake
 
 //The directory containing a CMake configuration file for actionlib_msgs.
 actionlib_msgs_DIR:PATH=/opt/ros/noetic/share/actionlib_msgs/cmake
+
+//The directory containing a CMake configuration file for bond.
+bond_DIR:PATH=/opt/ros/noetic/share/bond/cmake
+
+//The directory containing a CMake configuration file for bondcpp.
+bondcpp_DIR:PATH=/opt/ros/noetic/share/bondcpp/cmake
 
 //The directory containing a CMake configuration file for boost_atomic.
 boost_atomic_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_atomic-1.71.0
@@ -411,14 +455,29 @@ boost_atomic_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_atomic-1.71.0
 //The directory containing a CMake configuration file for boost_headers.
 boost_headers_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_headers-1.71.0
 
+//The directory containing a CMake configuration file for boost_serialization.
+boost_serialization_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_serialization-1.71.0
+
+//The directory containing a CMake configuration file for boost_system.
+boost_system_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_system-1.71.0
+
 //The directory containing a CMake configuration file for boost_thread.
 boost_thread_DIR:PATH=/usr/lib/x86_64-linux-gnu/cmake/boost_thread-1.71.0
 
 //The directory containing a CMake configuration file for catkin.
 catkin_DIR:PATH=/opt/ros/noetic/share/catkin/cmake
 
+//The directory containing a CMake configuration file for class_loader.
+class_loader_DIR:PATH=/opt/ros/noetic/share/class_loader/cmake
+
 //The directory containing a CMake configuration file for cpp_common.
 cpp_common_DIR:PATH=/opt/ros/noetic/share/cpp_common/cmake
+
+//Value Computed by CMake
+depthai_ros_testing_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/depthai_ros_testing
+
+//Value Computed by CMake
+depthai_ros_testing_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/depthai_ros_testing
 
 //The directory containing a CMake configuration file for diagnostic_msgs.
 diagnostic_msgs_DIR:PATH=/opt/ros/noetic/share/diagnostic_msgs/cmake
@@ -458,6 +517,9 @@ geometry_msgs_DIR:PATH=/opt/ros/noetic/share/geometry_msgs/cmake
 
 //Value Computed by CMake
 global_controller_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/global_controller
+
+//The directory containing a CMake configuration file for global_controller.
+global_controller_DIR:PATH=/home/group2/catkin_ws/devel/share/global_controller/cmake
 
 //Value Computed by CMake
 global_controller_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/global_controller
@@ -544,14 +606,32 @@ message_runtime_DIR:PATH=/opt/ros/noetic/share/message_runtime/cmake
 //The directory containing a CMake configuration file for nav_msgs.
 nav_msgs_DIR:PATH=/opt/ros/noetic/share/nav_msgs/cmake
 
+//The directory containing a CMake configuration file for nodelet.
+nodelet_DIR:PATH=/opt/ros/noetic/share/nodelet/cmake
+
+//Value Computed by CMake
+phidget_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/phidget
+
+//Value Computed by CMake
+phidget_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/phidget
+
 //Path to a library.
 pkgcfg_lib_LIBUSB_usb:FILEPATH=/usr/lib/x86_64-linux-gnu/libusb.so
+
+//The directory containing a CMake configuration file for pluginlib.
+pluginlib_DIR:PATH=/opt/ros/noetic/share/pluginlib/cmake
 
 //Value Computed by CMake
 ps3joy_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/ps3joy
 
 //Value Computed by CMake
 ps3joy_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/ps3joy
+
+//The directory containing a CMake configuration file for qt_gui.
+qt_gui_DIR:PATH=/opt/ros/noetic/share/qt_gui/cmake
+
+//The directory containing a CMake configuration file for qt_gui_cpp.
+qt_gui_cpp_DIR:PATH=/opt/ros/noetic/share/qt_gui_cpp/cmake
 
 //Value Computed by CMake
 rosaria_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/rosaria
@@ -577,8 +657,14 @@ rosgraph_DIR:PATH=/opt/ros/noetic/share/rosgraph/cmake
 //The directory containing a CMake configuration file for rosgraph_msgs.
 rosgraph_msgs_DIR:PATH=/opt/ros/noetic/share/rosgraph_msgs/cmake
 
+//The directory containing a CMake configuration file for roslib.
+roslib_DIR:PATH=/opt/ros/noetic/share/roslib/cmake
+
 //The directory containing a CMake configuration file for roslint.
 roslint_DIR:PATH=/opt/ros/noetic/share/roslint/cmake
+
+//The directory containing a CMake configuration file for rospack.
+rospack_DIR:PATH=/opt/ros/noetic/share/rospack/cmake
 
 //The directory containing a CMake configuration file for rospy.
 rospy_DIR:PATH=/opt/ros/noetic/share/rospy/cmake
@@ -586,8 +672,56 @@ rospy_DIR:PATH=/opt/ros/noetic/share/rospy/cmake
 //The directory containing a CMake configuration file for rostime.
 rostime_DIR:PATH=/opt/ros/noetic/share/rostime/cmake
 
+//Value Computed by CMake
+rqt_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface/rqt
+
+//Value Computed by CMake
+rqt_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface/rqt
+
+//Value Computed by CMake
+rqt_gui_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface/rqt_gui
+
+//The directory containing a CMake configuration file for rqt_gui.
+rqt_gui_DIR:PATH=/home/group2/catkin_ws/devel/share/rqt_gui/cmake
+
+//Value Computed by CMake
+rqt_gui_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface/rqt_gui
+
+//Value Computed by CMake
+rqt_gui_cpp_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface/rqt_gui_cpp
+
+//Dependencies for the target
+rqt_gui_cpp_LIB_DEPENDS:STATIC=general;/opt/ros/noetic/lib/libqt_gui_cpp.so;general;/usr/lib/x86_64-linux-gnu/libtinyxml.so;general;/opt/ros/noetic/lib/libnodeletlib.so;general;/opt/ros/noetic/lib/libbondcpp.so;general;/usr/lib/x86_64-linux-gnu/libuuid.so;general;/opt/ros/noetic/lib/libclass_loader.so;general;/usr/lib/x86_64-linux-gnu/libPocoFoundation.so;general;/usr/lib/x86_64-linux-gnu/libdl.so;general;/opt/ros/noetic/lib/libroslib.so;general;/opt/ros/noetic/lib/librospack.so;general;/usr/lib/x86_64-linux-gnu/libpython3.8.so;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libtinyxml2.so;general;/opt/ros/noetic/lib/libroscpp.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0;general;/opt/ros/noetic/lib/librosconsole.so;general;/opt/ros/noetic/lib/librosconsole_log4cxx.so;general;/opt/ros/noetic/lib/librosconsole_backend_interface.so;general;/usr/lib/x86_64-linux-gnu/liblog4cxx.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0;general;/opt/ros/noetic/lib/libxmlrpcpp.so;general;/opt/ros/noetic/lib/libroscpp_serialization.so;general;/opt/ros/noetic/lib/librostime.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so.1.71.0;general;/opt/ros/noetic/lib/libcpp_common.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4;general;Qt5::Widgets;
+
+//Value Computed by CMake
+rqt_gui_cpp_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface/rqt_gui_cpp
+
+//Value Computed by CMake
+rqt_gui_py_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface/rqt_gui_py
+
+//Value Computed by CMake
+rqt_gui_py_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface/rqt_gui_py
+
+//Value Computed by CMake
+rqt_py_common_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface/rqt_py_common
+
+//Value Computed by CMake
+rqt_py_common_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface/rqt_py_common
+
 //The directory containing a CMake configuration file for sensor_msgs.
 sensor_msgs_DIR:PATH=/opt/ros/noetic/share/sensor_msgs/cmake
+
+//Value Computed by CMake
+sick_scan_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/sick_scan_xd
+
+//Value Computed by CMake
+sick_scan_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/sick_scan_xd
+
+//Dependencies for the target
+sick_scan_lib_LIB_DEPENDS:STATIC=general;/opt/ros/noetic/lib/libroslib.so;general;/opt/ros/noetic/lib/librospack.so;general;/usr/lib/x86_64-linux-gnu/libpython3.8.so;general;/usr/lib/x86_64-linux-gnu/libboost_program_options.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libtinyxml2.so;general;/opt/ros/noetic/lib/libdiagnostic_updater.so;general;/opt/ros/noetic/lib/libdynamic_reconfigure_config_init_mutex.so;general;/opt/ros/noetic/lib/libtf.so;general;/opt/ros/noetic/lib/libtf2_ros.so;general;/opt/ros/noetic/lib/libactionlib.so;general;/opt/ros/noetic/lib/libmessage_filters.so;general;/opt/ros/noetic/lib/libroscpp.so;general;/usr/lib/x86_64-linux-gnu/libpthread.so;general;/usr/lib/x86_64-linux-gnu/libboost_chrono.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_filesystem.so.1.71.0;general;/opt/ros/noetic/lib/libxmlrpcpp.so;general;/opt/ros/noetic/lib/librosconsole.so;general;/opt/ros/noetic/lib/librosconsole_log4cxx.so;general;/opt/ros/noetic/lib/librosconsole_backend_interface.so;general;/usr/lib/x86_64-linux-gnu/liblog4cxx.so;general;/usr/lib/x86_64-linux-gnu/libboost_regex.so.1.71.0;general;/opt/ros/noetic/lib/libtf2.so;general;/opt/ros/noetic/lib/libroscpp_serialization.so;general;/opt/ros/noetic/lib/librostime.so;general;/usr/lib/x86_64-linux-gnu/libboost_date_time.so.1.71.0;general;/opt/ros/noetic/lib/libcpp_common.so;general;/usr/lib/x86_64-linux-gnu/libboost_system.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libboost_thread.so.1.71.0;general;/usr/lib/x86_64-linux-gnu/libconsole_bridge.so.0.4;
+
+//The directory containing a CMake configuration file for smclib.
+smclib_DIR:PATH=/opt/ros/noetic/share/smclib/cmake
 
 //Value Computed by CMake
 spacenav_node_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/joystick_drivers/spacenav_node
@@ -603,6 +737,12 @@ std_msgs_DIR:PATH=/opt/ros/noetic/share/std_msgs/cmake
 
 //The directory containing a CMake configuration file for std_srvs.
 std_srvs_DIR:PATH=/opt/ros/noetic/share/std_srvs/cmake
+
+//Value Computed by CMake
+stereo_camera_testing_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/stereo_camera_testing
+
+//Value Computed by CMake
+stereo_camera_testing_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/stereo_camera_testing
 
 //The directory containing a CMake configuration file for tf2.
 tf2_DIR:PATH=/opt/ros/noetic/share/tf2/cmake
@@ -621,6 +761,21 @@ tf_DIR:PATH=/opt/ros/noetic/share/tf/cmake
 
 //The directory containing a CMake configuration file for turtlesim.
 turtlesim_DIR:PATH=/opt/ros/noetic/share/turtlesim/cmake
+
+//Value Computed by CMake
+user_interface_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/user_interface
+
+//Value Computed by CMake
+user_interface_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/user_interface
+
+//The directory containing a CMake configuration file for visualization_msgs.
+visualization_msgs_DIR:PATH=/opt/ros/noetic/share/visualization_msgs/cmake
+
+//Value Computed by CMake
+waypoint_driver_BINARY_DIR:STATIC=/home/group2/catkin_ws/build/waypoint_driver
+
+//Value Computed by CMake
+waypoint_driver_SOURCE_DIR:STATIC=/home/group2/catkin_ws/src/waypoint_driver
 
 //The directory containing a CMake configuration file for xmlrpcpp.
 xmlrpcpp_DIR:PATH=/opt/ros/noetic/share/xmlrpcpp/cmake
@@ -775,7 +930,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=13
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -900,6 +1055,10 @@ __pkg_config_checked_LIBUSB:INTERNAL=1
 boost_atomic_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: boost_headers_DIR
 boost_headers_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: boost_serialization_DIR
+boost_serialization_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: boost_system_DIR
+boost_system_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: boost_thread_DIR
 boost_thread_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: gmock_build_tests

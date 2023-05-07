@@ -56,18 +56,6 @@ CMAKE_BINARY_DIR = /home/group2/catkin_ws/build
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
@@ -112,16 +100,17 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
-# Special rule for the target test
-test:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
-	/usr/bin/ctest --force-new-ctest-process $(ARGS)
-.PHONY : test
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
 
-# Special rule for the target test
-test/fast: test
-
-.PHONY : test/fast
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
 
 # Special rule for the target install/strip
 install/strip: preinstall
@@ -134,6 +123,17 @@ install/strip/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
 	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip/fast
+
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -168,46 +168,184 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-global_controller/CMakeFiles/global_controller.dir/rule:
-	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller.dir/rule
-.PHONY : global_controller/CMakeFiles/global_controller.dir/rule
+global_controller/CMakeFiles/global_controller_generate_messages.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages.dir/rule
 
 # Convenience name for target.
-global_controller: global_controller/CMakeFiles/global_controller.dir/rule
+global_controller_generate_messages: global_controller/CMakeFiles/global_controller_generate_messages.dir/rule
 
-.PHONY : global_controller
+.PHONY : global_controller_generate_messages
 
 # fast build rule for target.
-global_controller/fast:
-	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller.dir/build.make global_controller/CMakeFiles/global_controller.dir/build
-.PHONY : global_controller/fast
+global_controller_generate_messages/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages.dir/build
+.PHONY : global_controller_generate_messages/fast
 
-src/controller_node.o: src/controller_node.cpp.o
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_geneus.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_geneus.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_geneus.dir/rule
 
-.PHONY : src/controller_node.o
+# Convenience name for target.
+global_controller_geneus: global_controller/CMakeFiles/global_controller_geneus.dir/rule
 
-# target to build an object file
-src/controller_node.cpp.o:
-	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller.dir/build.make global_controller/CMakeFiles/global_controller.dir/src/controller_node.cpp.o
-.PHONY : src/controller_node.cpp.o
+.PHONY : global_controller_geneus
 
-src/controller_node.i: src/controller_node.cpp.i
+# fast build rule for target.
+global_controller_geneus/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_geneus.dir/build.make global_controller/CMakeFiles/global_controller_geneus.dir/build
+.PHONY : global_controller_geneus/fast
 
-.PHONY : src/controller_node.i
+# Convenience name for target.
+global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/rule
+.PHONY : global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/rule
 
-# target to preprocess a source file
-src/controller_node.cpp.i:
-	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller.dir/build.make global_controller/CMakeFiles/global_controller.dir/src/controller_node.cpp.i
-.PHONY : src/controller_node.cpp.i
+# Convenience name for target.
+_global_controller_generate_messages_check_deps_controller_states: global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/rule
 
-src/controller_node.s: src/controller_node.cpp.s
+.PHONY : _global_controller_generate_messages_check_deps_controller_states
 
-.PHONY : src/controller_node.s
+# fast build rule for target.
+_global_controller_generate_messages_check_deps_controller_states/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/build.make global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/build
+.PHONY : _global_controller_generate_messages_check_deps_controller_states/fast
 
-# target to generate assembly for a file
-src/controller_node.cpp.s:
-	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller.dir/build.make global_controller/CMakeFiles/global_controller.dir/src/controller_node.cpp.s
-.PHONY : src/controller_node.cpp.s
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/rule
+
+# Convenience name for target.
+global_controller_generate_messages_cpp: global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/rule
+
+.PHONY : global_controller_generate_messages_cpp
+
+# fast build rule for target.
+global_controller_generate_messages_cpp/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/build
+.PHONY : global_controller_generate_messages_cpp/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_gencpp.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_gencpp.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_gencpp.dir/rule
+
+# Convenience name for target.
+global_controller_gencpp: global_controller/CMakeFiles/global_controller_gencpp.dir/rule
+
+.PHONY : global_controller_gencpp
+
+# fast build rule for target.
+global_controller_gencpp/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_gencpp.dir/build.make global_controller/CMakeFiles/global_controller_gencpp.dir/build
+.PHONY : global_controller_gencpp/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_gennodejs.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_gennodejs.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_gennodejs.dir/rule
+
+# Convenience name for target.
+global_controller_gennodejs: global_controller/CMakeFiles/global_controller_gennodejs.dir/rule
+
+.PHONY : global_controller_gennodejs
+
+# fast build rule for target.
+global_controller_gennodejs/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_gennodejs.dir/build.make global_controller/CMakeFiles/global_controller_gennodejs.dir/build
+.PHONY : global_controller_gennodejs/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/rule
+
+# Convenience name for target.
+global_controller_generate_messages_eus: global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/rule
+
+.PHONY : global_controller_generate_messages_eus
+
+# fast build rule for target.
+global_controller_generate_messages_eus/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/build
+.PHONY : global_controller_generate_messages_eus/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/rule
+
+# Convenience name for target.
+global_controller_generate_messages_lisp: global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/rule
+
+.PHONY : global_controller_generate_messages_lisp
+
+# fast build rule for target.
+global_controller_generate_messages_lisp/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/build
+.PHONY : global_controller_generate_messages_lisp/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_genlisp.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_genlisp.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_genlisp.dir/rule
+
+# Convenience name for target.
+global_controller_genlisp: global_controller/CMakeFiles/global_controller_genlisp.dir/rule
+
+.PHONY : global_controller_genlisp
+
+# fast build rule for target.
+global_controller_genlisp/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_genlisp.dir/build.make global_controller/CMakeFiles/global_controller_genlisp.dir/build
+.PHONY : global_controller_genlisp/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/rule
+
+# Convenience name for target.
+global_controller_generate_messages_nodejs: global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/rule
+
+.PHONY : global_controller_generate_messages_nodejs
+
+# fast build rule for target.
+global_controller_generate_messages_nodejs/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/build
+.PHONY : global_controller_generate_messages_nodejs/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_generate_messages_py.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_generate_messages_py.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_generate_messages_py.dir/rule
+
+# Convenience name for target.
+global_controller_generate_messages_py: global_controller/CMakeFiles/global_controller_generate_messages_py.dir/rule
+
+.PHONY : global_controller_generate_messages_py
+
+# fast build rule for target.
+global_controller_generate_messages_py/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_py.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_py.dir/build
+.PHONY : global_controller_generate_messages_py/fast
+
+# Convenience name for target.
+global_controller/CMakeFiles/global_controller_genpy.dir/rule:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 global_controller/CMakeFiles/global_controller_genpy.dir/rule
+.PHONY : global_controller/CMakeFiles/global_controller_genpy.dir/rule
+
+# Convenience name for target.
+global_controller_genpy: global_controller/CMakeFiles/global_controller_genpy.dir/rule
+
+.PHONY : global_controller_genpy
+
+# fast build rule for target.
+global_controller_genpy/fast:
+	cd /home/group2/catkin_ws/build && $(MAKE) -f global_controller/CMakeFiles/global_controller_genpy.dir/build.make global_controller/CMakeFiles/global_controller_genpy.dir/build
+.PHONY : global_controller_genpy/fast
 
 # Help Target
 help:
@@ -215,17 +353,25 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... install/local"
 	@echo "... install"
 	@echo "... list_install_components"
+	@echo "... global_controller_generate_messages"
+	@echo "... global_controller_geneus"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... test"
+	@echo "... _global_controller_generate_messages_check_deps_controller_states"
+	@echo "... global_controller_generate_messages_cpp"
+	@echo "... install/local"
+	@echo "... global_controller_gencpp"
+	@echo "... global_controller_gennodejs"
+	@echo "... global_controller_generate_messages_eus"
+	@echo "... global_controller_generate_messages_lisp"
+	@echo "... global_controller_genlisp"
+	@echo "... global_controller_generate_messages_nodejs"
 	@echo "... install/strip"
-	@echo "... global_controller"
-	@echo "... src/controller_node.o"
-	@echo "... src/controller_node.i"
-	@echo "... src/controller_node.s"
+	@echo "... global_controller_generate_messages_py"
+	@echo "... global_controller_genpy"
+	@echo "... test"
 .PHONY : help
 
 

@@ -1,0 +1,8 @@
+prefix=/home/group2/catkin_ws/devel
+
+Name: stereo_camera_testing
+Description: Description of stereo_camera_testing
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

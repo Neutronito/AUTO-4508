@@ -1,0 +1,3 @@
+bool is_driving_automatically
+bool is_allowed_to_drive
+bool tiz_is_boosted

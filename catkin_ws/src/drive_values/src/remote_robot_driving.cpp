@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
-
+#include <global_controller/controller_states.h>
 
 class RemoteDrive
 {
@@ -10,13 +10,17 @@ public:
 
 private:
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
+  void updateState(const global_controller::controller_states::ConstPtr& states);
 
   ros::NodeHandle nh_;
+
+  bool is_remote_driving   = true;
+  bool is_allowed_to_drive = false;
 
   int linear_, angular_;
   double l_scale_, a_scale_;
   ros::Publisher vel_pub_;
-  ros::Subscriber joy_sub_;
+  ros::Subscriber joy_sub_, states_sub_;
 
 };
 
@@ -26,18 +30,24 @@ RemoteDrive::RemoteDrive():
   angular_(2)
 
 {
+    nh_.param("axis_linear", linear_, linear_);
+    nh_.param("axis_angular", angular_, angular_);
+    nh_.param("scale_angular", a_scale_, a_scale_);
+    nh_.param("scale_linear", l_scale_, l_scale_);
 
-  nh_.param("axis_linear", linear_, linear_);
-  nh_.param("axis_angular", angular_, angular_);
-  nh_.param("scale_angular", a_scale_, a_scale_);
-  nh_.param("scale_linear", l_scale_, l_scale_);
+    // Setup publishing to RosAria/cmd_vel topic
+    vel_pub_ = nh_.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 1);
+    // Setup subscribing to joystick topic
+    joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &RemoteDrive::joyCallback, this);
 
+    // Setup subscribing to global_controller/states topic
+    states_sub_ = nh_.subscribe<global_controller::controller_states>(
+        "/global_controller/states", 10, &RemoteDrive::updateState, this);
+}
 
-  vel_pub_ = nh_.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 1);
-
-
-  joy_sub_ = nh_.subscribe<sensor_msgs::Joy>("joy", 10, &RemoteDrive::joyCallback, this);
-
+void RemoteDrive::updateState(const global_controller::controller_states::ConstPtr& states) {
+    is_remote_driving   = !states->is_driving_automatically;
+    is_allowed_to_drive = states->is_allowed_to_drive;
 }
 
 void RemoteDrive::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
@@ -54,13 +64,13 @@ void RemoteDrive::joyCallback(const sensor_msgs::Joy::ConstPtr& joy)
 		turboFactor = 4;
  	}
 
-	// Deadman switch on R2
-	if (joy->buttons[7] == 1) {
-		twist.angular.z = a_scale_*joy->axes[angular_]*turboFactor;
-		twist.linear.x = l_scale_*joy->axes[linear_]*turboFactor;
-	} 
+    twist.angular.z = a_scale_*joy->axes[angular_]*turboFactor;
+    twist.linear.x = l_scale_*joy->axes[linear_]*turboFactor;
 
-	vel_pub_.publish(twist);
+    // Only do remote driving if the remote_driving state is true
+    if (is_remote_driving && is_allowed_to_drive) {
+        vel_pub_.publish(twist);
+    }
 }
 
 

@@ -285,19 +285,6 @@ gtest/fast:
 .PHONY : gtest/fast
 
 #=============================================================================
-# Target rules for targets named drive_values
-
-# Build rule for target.
-drive_values: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 drive_values
-.PHONY : drive_values
-
-# fast build rule for target.
-drive_values/fast:
-	$(MAKE) -f drive_values/CMakeFiles/drive_values.dir/build.make drive_values/CMakeFiles/drive_values.dir/build
-.PHONY : drive_values/fast
-
-#=============================================================================
 # Target rules for targets named std_msgs_generate_messages_py
 
 # Build rule for target.
@@ -307,7 +294,7 @@ std_msgs_generate_messages_py: cmake_check_build_system
 
 # fast build rule for target.
 std_msgs_generate_messages_py/fast:
-	$(MAKE) -f drive_values/CMakeFiles/std_msgs_generate_messages_py.dir/build.make drive_values/CMakeFiles/std_msgs_generate_messages_py.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_py.dir/build.make depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_py.dir/build
 .PHONY : std_msgs_generate_messages_py/fast
 
 #=============================================================================
@@ -320,7 +307,7 @@ std_msgs_generate_messages_nodejs: cmake_check_build_system
 
 # fast build rule for target.
 std_msgs_generate_messages_nodejs/fast:
-	$(MAKE) -f drive_values/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build.make drive_values/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build.make depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_nodejs.dir/build
 .PHONY : std_msgs_generate_messages_nodejs/fast
 
 #=============================================================================
@@ -333,7 +320,7 @@ roscpp_generate_messages_cpp: cmake_check_build_system
 
 # fast build rule for target.
 roscpp_generate_messages_cpp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/roscpp_generate_messages_cpp.dir/build.make drive_values/CMakeFiles/roscpp_generate_messages_cpp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/roscpp_generate_messages_cpp.dir/build.make depthai_ros_testing/CMakeFiles/roscpp_generate_messages_cpp.dir/build
 .PHONY : roscpp_generate_messages_cpp/fast
 
 #=============================================================================
@@ -346,7 +333,7 @@ roscpp_generate_messages_eus: cmake_check_build_system
 
 # fast build rule for target.
 roscpp_generate_messages_eus/fast:
-	$(MAKE) -f drive_values/CMakeFiles/roscpp_generate_messages_eus.dir/build.make drive_values/CMakeFiles/roscpp_generate_messages_eus.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/roscpp_generate_messages_eus.dir/build.make depthai_ros_testing/CMakeFiles/roscpp_generate_messages_eus.dir/build
 .PHONY : roscpp_generate_messages_eus/fast
 
 #=============================================================================
@@ -359,7 +346,7 @@ rosgraph_msgs_generate_messages_nodejs: cmake_check_build_system
 
 # fast build rule for target.
 rosgraph_msgs_generate_messages_nodejs/fast:
-	$(MAKE) -f drive_values/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build.make drive_values/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build.make depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_nodejs.dir/build
 .PHONY : rosgraph_msgs_generate_messages_nodejs/fast
 
 #=============================================================================
@@ -372,7 +359,7 @@ std_msgs_generate_messages_lisp: cmake_check_build_system
 
 # fast build rule for target.
 std_msgs_generate_messages_lisp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/std_msgs_generate_messages_lisp.dir/build.make drive_values/CMakeFiles/std_msgs_generate_messages_lisp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_lisp.dir/build.make depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_lisp.dir/build
 .PHONY : std_msgs_generate_messages_lisp/fast
 
 #=============================================================================
@@ -385,7 +372,7 @@ roscpp_generate_messages_py: cmake_check_build_system
 
 # fast build rule for target.
 roscpp_generate_messages_py/fast:
-	$(MAKE) -f drive_values/CMakeFiles/roscpp_generate_messages_py.dir/build.make drive_values/CMakeFiles/roscpp_generate_messages_py.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/roscpp_generate_messages_py.dir/build.make depthai_ros_testing/CMakeFiles/roscpp_generate_messages_py.dir/build
 .PHONY : roscpp_generate_messages_py/fast
 
 #=============================================================================
@@ -398,7 +385,7 @@ std_msgs_generate_messages_eus: cmake_check_build_system
 
 # fast build rule for target.
 std_msgs_generate_messages_eus/fast:
-	$(MAKE) -f drive_values/CMakeFiles/std_msgs_generate_messages_eus.dir/build.make drive_values/CMakeFiles/std_msgs_generate_messages_eus.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_eus.dir/build.make depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_eus.dir/build
 .PHONY : std_msgs_generate_messages_eus/fast
 
 #=============================================================================
@@ -411,7 +398,7 @@ roscpp_generate_messages_nodejs: cmake_check_build_system
 
 # fast build rule for target.
 roscpp_generate_messages_nodejs/fast:
-	$(MAKE) -f drive_values/CMakeFiles/roscpp_generate_messages_nodejs.dir/build.make drive_values/CMakeFiles/roscpp_generate_messages_nodejs.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/roscpp_generate_messages_nodejs.dir/build.make depthai_ros_testing/CMakeFiles/roscpp_generate_messages_nodejs.dir/build
 .PHONY : roscpp_generate_messages_nodejs/fast
 
 #=============================================================================
@@ -424,7 +411,7 @@ rosgraph_msgs_generate_messages_cpp: cmake_check_build_system
 
 # fast build rule for target.
 rosgraph_msgs_generate_messages_cpp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build.make drive_values/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build.make depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_cpp.dir/build
 .PHONY : rosgraph_msgs_generate_messages_cpp/fast
 
 #=============================================================================
@@ -437,7 +424,7 @@ std_msgs_generate_messages_cpp: cmake_check_build_system
 
 # fast build rule for target.
 std_msgs_generate_messages_cpp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/std_msgs_generate_messages_cpp.dir/build.make drive_values/CMakeFiles/std_msgs_generate_messages_cpp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_cpp.dir/build.make depthai_ros_testing/CMakeFiles/std_msgs_generate_messages_cpp.dir/build
 .PHONY : std_msgs_generate_messages_cpp/fast
 
 #=============================================================================
@@ -450,7 +437,7 @@ rosgraph_msgs_generate_messages_eus: cmake_check_build_system
 
 # fast build rule for target.
 rosgraph_msgs_generate_messages_eus/fast:
-	$(MAKE) -f drive_values/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build.make drive_values/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build.make depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_eus.dir/build
 .PHONY : rosgraph_msgs_generate_messages_eus/fast
 
 #=============================================================================
@@ -463,7 +450,7 @@ rosgraph_msgs_generate_messages_lisp: cmake_check_build_system
 
 # fast build rule for target.
 rosgraph_msgs_generate_messages_lisp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build.make drive_values/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build.make depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_lisp.dir/build
 .PHONY : rosgraph_msgs_generate_messages_lisp/fast
 
 #=============================================================================
@@ -476,7 +463,7 @@ roscpp_generate_messages_lisp: cmake_check_build_system
 
 # fast build rule for target.
 roscpp_generate_messages_lisp/fast:
-	$(MAKE) -f drive_values/CMakeFiles/roscpp_generate_messages_lisp.dir/build.make drive_values/CMakeFiles/roscpp_generate_messages_lisp.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/roscpp_generate_messages_lisp.dir/build.make depthai_ros_testing/CMakeFiles/roscpp_generate_messages_lisp.dir/build
 .PHONY : roscpp_generate_messages_lisp/fast
 
 #=============================================================================
@@ -489,21 +476,177 @@ rosgraph_msgs_generate_messages_py: cmake_check_build_system
 
 # fast build rule for target.
 rosgraph_msgs_generate_messages_py/fast:
-	$(MAKE) -f drive_values/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build.make drive_values/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build
+	$(MAKE) -f depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build.make depthai_ros_testing/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build
 .PHONY : rosgraph_msgs_generate_messages_py/fast
 
 #=============================================================================
-# Target rules for targets named global_controller
+# Target rules for targets named global_controller_generate_messages
 
 # Build rule for target.
-global_controller: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 global_controller
-.PHONY : global_controller
+global_controller_generate_messages: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages
+.PHONY : global_controller_generate_messages
 
 # fast build rule for target.
-global_controller/fast:
-	$(MAKE) -f global_controller/CMakeFiles/global_controller.dir/build.make global_controller/CMakeFiles/global_controller.dir/build
-.PHONY : global_controller/fast
+global_controller_generate_messages/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages.dir/build
+.PHONY : global_controller_generate_messages/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_geneus
+
+# Build rule for target.
+global_controller_geneus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_geneus
+.PHONY : global_controller_geneus
+
+# fast build rule for target.
+global_controller_geneus/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_geneus.dir/build.make global_controller/CMakeFiles/global_controller_geneus.dir/build
+.PHONY : global_controller_geneus/fast
+
+#=============================================================================
+# Target rules for targets named _global_controller_generate_messages_check_deps_controller_states
+
+# Build rule for target.
+_global_controller_generate_messages_check_deps_controller_states: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _global_controller_generate_messages_check_deps_controller_states
+.PHONY : _global_controller_generate_messages_check_deps_controller_states
+
+# fast build rule for target.
+_global_controller_generate_messages_check_deps_controller_states/fast:
+	$(MAKE) -f global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/build.make global_controller/CMakeFiles/_global_controller_generate_messages_check_deps_controller_states.dir/build
+.PHONY : _global_controller_generate_messages_check_deps_controller_states/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_generate_messages_cpp
+
+# Build rule for target.
+global_controller_generate_messages_cpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages_cpp
+.PHONY : global_controller_generate_messages_cpp
+
+# fast build rule for target.
+global_controller_generate_messages_cpp/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_cpp.dir/build
+.PHONY : global_controller_generate_messages_cpp/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_gencpp
+
+# Build rule for target.
+global_controller_gencpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_gencpp
+.PHONY : global_controller_gencpp
+
+# fast build rule for target.
+global_controller_gencpp/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_gencpp.dir/build.make global_controller/CMakeFiles/global_controller_gencpp.dir/build
+.PHONY : global_controller_gencpp/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_gennodejs
+
+# Build rule for target.
+global_controller_gennodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_gennodejs
+.PHONY : global_controller_gennodejs
+
+# fast build rule for target.
+global_controller_gennodejs/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_gennodejs.dir/build.make global_controller/CMakeFiles/global_controller_gennodejs.dir/build
+.PHONY : global_controller_gennodejs/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_generate_messages_eus
+
+# Build rule for target.
+global_controller_generate_messages_eus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages_eus
+.PHONY : global_controller_generate_messages_eus
+
+# fast build rule for target.
+global_controller_generate_messages_eus/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_eus.dir/build
+.PHONY : global_controller_generate_messages_eus/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_generate_messages_lisp
+
+# Build rule for target.
+global_controller_generate_messages_lisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages_lisp
+.PHONY : global_controller_generate_messages_lisp
+
+# fast build rule for target.
+global_controller_generate_messages_lisp/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_lisp.dir/build
+.PHONY : global_controller_generate_messages_lisp/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_genlisp
+
+# Build rule for target.
+global_controller_genlisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_genlisp
+.PHONY : global_controller_genlisp
+
+# fast build rule for target.
+global_controller_genlisp/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_genlisp.dir/build.make global_controller/CMakeFiles/global_controller_genlisp.dir/build
+.PHONY : global_controller_genlisp/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_generate_messages_nodejs
+
+# Build rule for target.
+global_controller_generate_messages_nodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages_nodejs
+.PHONY : global_controller_generate_messages_nodejs
+
+# fast build rule for target.
+global_controller_generate_messages_nodejs/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_nodejs.dir/build
+.PHONY : global_controller_generate_messages_nodejs/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_generate_messages_py
+
+# Build rule for target.
+global_controller_generate_messages_py: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_generate_messages_py
+.PHONY : global_controller_generate_messages_py
+
+# fast build rule for target.
+global_controller_generate_messages_py/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_generate_messages_py.dir/build.make global_controller/CMakeFiles/global_controller_generate_messages_py.dir/build
+.PHONY : global_controller_generate_messages_py/fast
+
+#=============================================================================
+# Target rules for targets named global_controller_genpy
+
+# Build rule for target.
+global_controller_genpy: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 global_controller_genpy
+.PHONY : global_controller_genpy
+
+# fast build rule for target.
+global_controller_genpy/fast:
+	$(MAKE) -f global_controller/CMakeFiles/global_controller_genpy.dir/build.make global_controller/CMakeFiles/global_controller_genpy.dir/build
+.PHONY : global_controller_genpy/fast
+
+#=============================================================================
+# Target rules for targets named drive_values
+
+# Build rule for target.
+drive_values: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 drive_values
+.PHONY : drive_values
+
+# fast build rule for target.
+drive_values/fast:
+	$(MAKE) -f drive_values/CMakeFiles/drive_values.dir/build.make drive_values/CMakeFiles/drive_values.dir/build
+.PHONY : drive_values/fast
 
 #=============================================================================
 # Target rules for targets named actionlib_generate_messages_eus
@@ -1363,6 +1506,175 @@ std_srvs_generate_messages_nodejs/fast:
 	$(MAKE) -f learning_joy/CMakeFiles/std_srvs_generate_messages_nodejs.dir/build.make learning_joy/CMakeFiles/std_srvs_generate_messages_nodejs.dir/build
 .PHONY : std_srvs_generate_messages_nodejs/fast
 
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages
+
+# Build rule for target.
+waypoint_driver_generate_messages: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages
+.PHONY : waypoint_driver_generate_messages
+
+# fast build rule for target.
+waypoint_driver_generate_messages/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages.dir/build
+.PHONY : waypoint_driver_generate_messages/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_gencpp
+
+# Build rule for target.
+waypoint_driver_gencpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_gencpp
+.PHONY : waypoint_driver_gencpp
+
+# fast build rule for target.
+waypoint_driver_gencpp/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_gencpp.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_gencpp.dir/build
+.PHONY : waypoint_driver_gencpp/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_genlisp
+
+# Build rule for target.
+waypoint_driver_genlisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_genlisp
+.PHONY : waypoint_driver_genlisp
+
+# fast build rule for target.
+waypoint_driver_genlisp/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_genlisp.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_genlisp.dir/build
+.PHONY : waypoint_driver_genlisp/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_geneus
+
+# Build rule for target.
+waypoint_driver_geneus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_geneus
+.PHONY : waypoint_driver_geneus
+
+# fast build rule for target.
+waypoint_driver_geneus/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_geneus.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_geneus.dir/build
+.PHONY : waypoint_driver_geneus/fast
+
+#=============================================================================
+# Target rules for targets named _waypoint_driver_generate_messages_check_deps_gps_points
+
+# Build rule for target.
+_waypoint_driver_generate_messages_check_deps_gps_points: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _waypoint_driver_generate_messages_check_deps_gps_points
+.PHONY : _waypoint_driver_generate_messages_check_deps_gps_points
+
+# fast build rule for target.
+_waypoint_driver_generate_messages_check_deps_gps_points/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/_waypoint_driver_generate_messages_check_deps_gps_points.dir/build.make waypoint_driver/CMakeFiles/_waypoint_driver_generate_messages_check_deps_gps_points.dir/build
+.PHONY : _waypoint_driver_generate_messages_check_deps_gps_points/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages_eus
+
+# Build rule for target.
+waypoint_driver_generate_messages_eus: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages_eus
+.PHONY : waypoint_driver_generate_messages_eus
+
+# fast build rule for target.
+waypoint_driver_generate_messages_eus/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_eus.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_eus.dir/build
+.PHONY : waypoint_driver_generate_messages_eus/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages_lisp
+
+# Build rule for target.
+waypoint_driver_generate_messages_lisp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages_lisp
+.PHONY : waypoint_driver_generate_messages_lisp
+
+# fast build rule for target.
+waypoint_driver_generate_messages_lisp/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_lisp.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_lisp.dir/build
+.PHONY : waypoint_driver_generate_messages_lisp/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages_nodejs
+
+# Build rule for target.
+waypoint_driver_generate_messages_nodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages_nodejs
+.PHONY : waypoint_driver_generate_messages_nodejs
+
+# fast build rule for target.
+waypoint_driver_generate_messages_nodejs/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_nodejs.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_nodejs.dir/build
+.PHONY : waypoint_driver_generate_messages_nodejs/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_gennodejs
+
+# Build rule for target.
+waypoint_driver_gennodejs: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_gennodejs
+.PHONY : waypoint_driver_gennodejs
+
+# fast build rule for target.
+waypoint_driver_gennodejs/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_gennodejs.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_gennodejs.dir/build
+.PHONY : waypoint_driver_gennodejs/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages_cpp
+
+# Build rule for target.
+waypoint_driver_generate_messages_cpp: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages_cpp
+.PHONY : waypoint_driver_generate_messages_cpp
+
+# fast build rule for target.
+waypoint_driver_generate_messages_cpp/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_cpp.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_cpp.dir/build
+.PHONY : waypoint_driver_generate_messages_cpp/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_genpy
+
+# Build rule for target.
+waypoint_driver_genpy: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_genpy
+.PHONY : waypoint_driver_genpy
+
+# fast build rule for target.
+waypoint_driver_genpy/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_genpy.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_genpy.dir/build
+.PHONY : waypoint_driver_genpy/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_node
+
+# Build rule for target.
+waypoint_driver_node: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_node
+.PHONY : waypoint_driver_node
+
+# fast build rule for target.
+waypoint_driver_node/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_node.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_node.dir/build
+.PHONY : waypoint_driver_node/fast
+
+#=============================================================================
+# Target rules for targets named waypoint_driver_generate_messages_py
+
+# Build rule for target.
+waypoint_driver_generate_messages_py: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 waypoint_driver_generate_messages_py
+.PHONY : waypoint_driver_generate_messages_py
+
+# fast build rule for target.
+waypoint_driver_generate_messages_py/fast:
+	$(MAKE) -f waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_py.dir/build.make waypoint_driver/CMakeFiles/waypoint_driver_generate_messages_py.dir/build
+.PHONY : waypoint_driver_generate_messages_py/fast
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1385,7 +1697,6 @@ help:
 	@echo "... gmock"
 	@echo "... gtest_main"
 	@echo "... gtest"
-	@echo "... drive_values"
 	@echo "... std_msgs_generate_messages_py"
 	@echo "... std_msgs_generate_messages_nodejs"
 	@echo "... roscpp_generate_messages_cpp"
@@ -1401,7 +1712,19 @@ help:
 	@echo "... rosgraph_msgs_generate_messages_lisp"
 	@echo "... roscpp_generate_messages_lisp"
 	@echo "... rosgraph_msgs_generate_messages_py"
-	@echo "... global_controller"
+	@echo "... global_controller_generate_messages"
+	@echo "... global_controller_geneus"
+	@echo "... _global_controller_generate_messages_check_deps_controller_states"
+	@echo "... global_controller_generate_messages_cpp"
+	@echo "... global_controller_gencpp"
+	@echo "... global_controller_gennodejs"
+	@echo "... global_controller_generate_messages_eus"
+	@echo "... global_controller_generate_messages_lisp"
+	@echo "... global_controller_genlisp"
+	@echo "... global_controller_generate_messages_nodejs"
+	@echo "... global_controller_generate_messages_py"
+	@echo "... global_controller_genpy"
+	@echo "... drive_values"
 	@echo "... actionlib_generate_messages_eus"
 	@echo "... actionlib_msgs_generate_messages_cpp"
 	@echo "... actionlib_msgs_generate_messages_py"
@@ -1468,6 +1791,19 @@ help:
 	@echo "... std_srvs_generate_messages_lisp"
 	@echo "... turtlesim_generate_messages_py"
 	@echo "... std_srvs_generate_messages_nodejs"
+	@echo "... waypoint_driver_generate_messages"
+	@echo "... waypoint_driver_gencpp"
+	@echo "... waypoint_driver_genlisp"
+	@echo "... waypoint_driver_geneus"
+	@echo "... _waypoint_driver_generate_messages_check_deps_gps_points"
+	@echo "... waypoint_driver_generate_messages_eus"
+	@echo "... waypoint_driver_generate_messages_lisp"
+	@echo "... waypoint_driver_generate_messages_nodejs"
+	@echo "... waypoint_driver_gennodejs"
+	@echo "... waypoint_driver_generate_messages_cpp"
+	@echo "... waypoint_driver_genpy"
+	@echo "... waypoint_driver_node"
+	@echo "... waypoint_driver_generate_messages_py"
 .PHONY : help
 
 

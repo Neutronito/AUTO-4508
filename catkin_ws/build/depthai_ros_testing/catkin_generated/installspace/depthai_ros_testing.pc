@@ -1,0 +1,8 @@
+prefix=/home/group2/catkin_ws/install
+
+Name: depthai_ros_testing
+Description: Description of depthai_ros_testing
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

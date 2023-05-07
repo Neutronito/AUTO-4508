@@ -131,10 +131,15 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/group2/catkin_ws/build/gtest/cmake_install.cmake")
-  include("/home/group2/catkin_ws/build/drive_values/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/depthai_ros_testing/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/global_controller/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/drive_values/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/phidget/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/stereo_camera_testing/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/rosaria/cmake_install.cmake")
   include("/home/group2/catkin_ws/build/learning_joy/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/user_interface/cmake_install.cmake")
+  include("/home/group2/catkin_ws/build/waypoint_driver/cmake_install.cmake")
 
 endif()
 
