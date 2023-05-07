@@ -1,0 +1,4 @@
+# Able to get a working visualisation using this command
+
+
+roslaunch depthai_examples mobile_publisher.launch | rqt_image_view -t /mobilenet_publisher/color/image
