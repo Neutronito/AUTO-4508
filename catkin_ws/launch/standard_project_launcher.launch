@@ -11,7 +11,11 @@
 
     <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/waypoints.txt" output="screen"/> 
 
-    <node name="waypoint_driver_node" pkg="waypoint_driver" type="waypoint_driver_node" output="log"/>
+    <node name="waypoint_driver_node" pkg="waypoint_driver" type="waypoint_driver_node" output="screen"/>
+
+    <node name="imu_publisher_node" pkg="imu_reader" type="imu_publisher_node.py"/>
+
+    <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" args="_baud:=9600 _port:=/dev/ttyACM0"/>
 
     <!-- Axes -->
     <param name="axis_linear" value="1" type="int"/>
