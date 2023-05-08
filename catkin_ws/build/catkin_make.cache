@@ -1,2 +1,0 @@
-depthai_ros_testing:drive_values:global_controller:learning_joy:phidget:rosaria:stereo_camera_testing:user_interface:waypoint_driver
--DCATKIN_DEVEL_PREFIX=/home/group2/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/group2/catkin_ws/install -G Unix Makefiles

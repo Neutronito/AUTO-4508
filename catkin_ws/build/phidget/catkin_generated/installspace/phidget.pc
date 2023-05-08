@@ -1,8 +1,0 @@
-prefix=/home/group2/catkin_ws/install
-
-Name: phidget
-Description: Description of phidget
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
