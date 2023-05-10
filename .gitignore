@@ -1,0 +1,6 @@
+catkin_ws/build
+catkin_ws/devel
+
+sick_scan_ws/build_isolated
+sick_scan_ws/devel_isolated
+sick_scan_ws/install_isolated
