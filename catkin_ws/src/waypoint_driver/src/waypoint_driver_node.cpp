@@ -1,58 +1,86 @@
 #include "ros/ros.h"
+#include <stdlib.h>
 #include "waypoint_driver/gps_points.h"
 #include "std_msgs/Float64.h"
 #include "sensor_msgs/NavSatFix.h"
-#include <stdlib.h>
 
-// THIS CODE IS STUPID
-// Someone else tried to do this, this is how you would do it:
-// https://answers.ros.org/question/339442/is-it-possible-to-have-a-subscriber-inside-the-service-server/
+float requestLatitude;
+float requestLongitude;
+bool currentlyDriving;
 
-void gps_value_callback(const sensor_msgs::NavSatFix::ConstPtr& fix) {
-	ROS_INFO("Recieved a navsat message, longitude is %f and latitude is %f", 180.0, 180.0);
+float curHeading;
+bool recieved_heading = false;
+
+float curLatitude;
+float curLongitude;
+bool recievedCoords = false;
+
+// 1 topics, 2 service
+
+// First service is used to initialize way point driving, if driving is already underway false is returned as an error.
+// Second service is used to pause driving or terminate current waypoint
+// Third topic posts when a task is complete
+
+// Gets the imu heading and updates global flags and variables
+void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
+    if (currentlyDriving) {
+		curHeading = msg->data;
+		recieved_heading = true;
+	}
 }
 
-void imu_value_callback(const std_msgs::Float64::ConstPtr& heading) {
-	ROS_INFO("Recieved a heading, value is %f", 180.0);
-
+// Gets the gps coordinates and updates global flags and variables
+void gps_callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
+	if (currentlyDriving) {
+		curLatitude = msg->latitude;
+		curLongitude = msg->longitude;
+		recievedCoords = true;
+	}
 }
+
 
 bool drive_waypoint(waypoint_driver::gps_points::Request  &req, waypoint_driver::gps_points::Response &res) {
 	// Parse recieved data
 	double latitude = req.latitude;
 	double longitude = req.latitude;
 	ROS_INFO("Recieved request of: lat=%f, long=%f", latitude, longitude);
-	bool returnval = false;
-
-	// Start the gps_waypoint reader
-	ros::Subscriber gps_subscriber = waypoint_handle.subscribe("fix", 10, gps_value_callback);
-
-	// Start the imu reader
-	ros::Subscriber imu_subscriber = waypoint_handle.subscribe("imu_heading", 10, imu_value_callback);
-
-	while(true) {
-
+	if (currentlyDriving) {
+		ROS_INFO("I'm already driving, that waypoint request will be refused");
+		res.approved_request = false;
+		return true;
+	} else {
+		ROS_INFO("Coordinate request approved");
+		
+		// Set the flags
+		requestLatitude = latitude;
+		requestLongitude = longitude;
+		currentlyDriving = true;
+		
+		res.approved_request = true;
+		return true;		
 	}
-
-	// Send back the response
-	ROS_INFO("sending back response: [%d]", returnval);
-	res.reached_status = returnval;
-	
-	return true;
 }
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "waypoint_driver");
-	ros::start();
-
 	ros::NodeHandle waypoint_handle;
-
+	
 	// start the way point driving service
-	// Boost is being used here to pass in the waypoint handle to the drive waypoin srv callback
-	ros::ServiceServer service = waypoint_handle.advertiseService("gps_points",
-		boost::bind(&drive_waypoint, boost::ref(waypoint_handle), _1));
-	ROS_INFO("Ready to add two ints.");
-	ros::spin();
+	ros::ServiceServer service = waypoint_handle.advertiseService("gps_points", drive_waypoint);
+
+	// Subscribe to imu
+	ros::Subscriber imu_subscriber = waypoint_handle.subscribe("imu_heading", 10, imu_heading_callback);
+	// Subscribe to gps
+	ros::Subscriber gps_subscriber = waypoint_handle.subscribe("fix", 10, gps_callback);
+	
+	// Now commence the loop, our loop rate will be 10Hz
+	ros::Rate loop_rate(10);
+
+	while (ros::ok()){
+		ros::spinOnce();
+		loop_rate.sleep();
+	}
+
 
 	return 0;
 }
