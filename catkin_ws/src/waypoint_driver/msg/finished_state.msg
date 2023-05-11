@@ -1,0 +1,3 @@
+float64 longitude
+float64 latitude
+bool reached_waypoint
