@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include "waypoint_driver/gps_points.h"
+#include "waypoint_driver/status_change.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Bool.h"
 #include "sensor_msgs/NavSatFix.h"
 #include <geometry_msgs/Twist.h>
 #include "waypoint_driver/finished_state.h"
@@ -12,9 +14,13 @@
 #define MAXROTVEL 2
 #define ROTSCALEFACTOR 0.0222	
 
+bool onAJob = false;
+bool pausedDriving = false;
+bool deadman_pressed = false;
+
+
 float requestLatitude;
 float requestLongitude;
-bool currentlyDriving;
 
 float curHeading;
 bool receivedHeading = false;
@@ -34,7 +40,7 @@ float angularVelocity = 0;
 
 // Gets the imu heading and updates global flags and variables
 void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
-    if (currentlyDriving) {
+    if (onAJob) {
 		curHeading = msg->data;
 		// map heading 0-360
 		curHeading = curHeading + 360 % 360;
@@ -44,7 +50,7 @@ void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
 
 // Gets the gps coordinates and updates global flags and variables
 void gps_callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
-	if (currentlyDriving) {
+	if (onAJob) {
 		curLatitude = msg->latitude;
 		curLongitude = msg->longitude;
 		receivedCoords = true;
@@ -57,7 +63,7 @@ bool drive_waypoint(waypoint_driver::gps_points::Request  &req, waypoint_driver:
 	double latitude = req.latitude;
 	double longitude = req.longitude;
 	ROS_INFO("received request of: lat=%f, long=%f", latitude, longitude);
-	if (currentlyDriving) {
+	if (onAJob) {
 		ROS_INFO("I'm already driving, that waypoint request will be refused");
 		res.approved_request = false;
 		return true;
@@ -67,11 +73,31 @@ bool drive_waypoint(waypoint_driver::gps_points::Request  &req, waypoint_driver:
 		// Set the flags
 		requestLatitude = latitude;
 		requestLongitude = longitude;
-		currentlyDriving = true;
+		onAJob = true;
+		pausedDriving = false;
 		
 		res.approved_request = true;
 		return true;		
 	}
+}
+
+bool triggered_status_change(waypoint_driver::status_change::Request &req, waypoint_driver::status_change::Response &res) {
+	
+	// Deal with pause request
+	pausedDriving = req.pause;
+	res.pause_state = pausedDriving;
+
+	// Deal with termination request
+	if (req.terminate_current_drive == true) {
+		onAJob = false;
+	}
+	res.currently_on_job = onAJob;
+
+	return true;
+}
+
+void deadman_callback(const std_msgs::Bool::ConstPtr& msg) {
+	deadman_pressed = msg->data;
 }
 
 int main(int argc, char **argv) {
@@ -79,7 +105,10 @@ int main(int argc, char **argv) {
 	ros::NodeHandle waypoint_handle;
 	
 	// start the way point driving service
-	ros::ServiceServer service = waypoint_handle.advertiseService("gps_points", drive_waypoint);
+	ros::ServiceServer service = waypoint_handle.advertiseService("waypoint_driver/gps_points", drive_waypoint);
+
+	// start the status change srv
+	ros::ServiceServer satus_service = waypoint_handle.advertiseService("waypoint_driver/status_change", triggered_status_change);
 
 	// Subscribe to imu
 	ros::Subscriber imu_subscriber = waypoint_handle.subscribe("imu_heading", 10, imu_heading_callback);
@@ -92,6 +121,9 @@ int main(int argc, char **argv) {
 	// Set up publishing to finished state
 	ros::Publisher finished_publisher = waypoint_handle.advertise<waypoint_driver::finished_state>("waypoint_driver/finished_state", 10);
 
+	// Setup subscription to deadman topic
+	ros::Subscriber deadman_subscriber = waypoint_handle.subscribe("drive_values/deadman_state", 10, deadman_callback);
+
 	// Now commence the loop, our loop rate will be 10Hz
 	ros::Rate loopRate(10);
 
@@ -99,8 +131,7 @@ int main(int argc, char **argv) {
 	while (ros::ok()){
 		
 		// Check if we are currently driving
-		if (currentlyDriving) {
-
+		if (onAJob && !pausedDriving && deadman_pressed) {
 			// Check if new data has come through
 			if (receivedHeading) {
 				receivedHeading = false;
@@ -112,9 +143,9 @@ int main(int argc, char **argv) {
 						ROS_INFO("We have reached our desired coordinates");
 						linearVelocity = 0;
 						angularVelocity = 0;
-						currentlyDriving = false;
+						onAJob = false;
 						
-						ROS_INFO("Publishing information to finished state topic")
+						ROS_INFO("Publishing information to finished state topic");
 						waypoint_driver::finished_state msgToSend;
 						msgToSend.current_latitude = curLatitude;
 						msgToSend.current_longitude = curLongitude;
