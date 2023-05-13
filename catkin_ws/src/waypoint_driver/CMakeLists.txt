@@ -56,6 +56,7 @@ add_message_files(
 add_service_files(
   FILES
   gps_points.srv
+  status_change.srv
 )
 
 ## Generate actions in the 'action' folder
