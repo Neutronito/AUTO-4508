@@ -1,7 +1,6 @@
 #include <ros/ros.h>
 #include <geometry_msgs/Twist.h>
 #include <sensor_msgs/Joy.h>
-#include <global_controller/controller_states.h>
 #include "drive_values/enable_remote.h"
 #include <std_msgs/Bool.h>
 
@@ -14,7 +13,7 @@ public:
 
 private:
   void joyCallback(const sensor_msgs::Joy::ConstPtr& joy);
-  void updateState(const global_controller::controller_states::ConstPtr& states);
+  // void updateState(const global_controller::controller_states::ConstPtr& states);
 //   bool triggered_driving_enabled_change(drive_values::enable_remote::Request  &req, drive_values::enable_remote::Response &res);
 
   ros::NodeHandle nh_;
