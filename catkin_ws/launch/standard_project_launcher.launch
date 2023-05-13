@@ -11,7 +11,7 @@
 
     <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/waypoints.txt" output="screen"/> 
 
-    <node name="waypoint_driver_node" pkg="waypoint_driver" type="waypoint_driver_node" output="screen"/>
+    <node name="waypoint_driver_node" pkg="waypoint_driver" type="waypoint_driver_node"/>
 
     <node name="imu_publisher_node" pkg="imu_reader" type="imu_publisher_node.py"/>
 
