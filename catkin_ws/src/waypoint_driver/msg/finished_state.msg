@@ -1,3 +1,3 @@
-float64 current_Latitude
-float64 current_Longtitude
+float64 current_latitude
+float64 current_longitude
 bool reached_waypoint
