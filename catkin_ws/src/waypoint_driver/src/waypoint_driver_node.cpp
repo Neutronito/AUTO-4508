@@ -5,6 +5,7 @@
 #include "std_msgs/Float64.h"
 #include "sensor_msgs/NavSatFix.h"
 #include <geometry_msgs/Twist.h>
+#include "waypoint_driver/finished_state.h"
 
 #define GOALTOLERANCE 0.00001
 
@@ -86,8 +87,11 @@ int main(int argc, char **argv) {
 	ros::Subscriber gps_subscriber = waypoint_handle.subscribe("fix", 10, gps_callback);
 
 	// Setup publishing to rosaria cmd_vel
-	ros::Publisher velocity_publisher = waypoint_handle.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 1);
-	
+	ros::Publisher velocity_publisher = waypoint_handle.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 10);
+
+	// Set up publishing to finished state
+	ros::Publisher finished_publisher = waypoint_handle.advertise<waypoint_driver::finished_state>("waypoint_driver/finished_state", 10);
+
 	// Now commence the loop, our loop rate will be 10Hz
 	ros::Rate loopRate(10);
 
@@ -109,6 +113,13 @@ int main(int argc, char **argv) {
 						linearVelocity = 0;
 						angularVelocity = 0;
 						currentlyDriving = false;
+						
+						ROS_INFO("Publishing information to finished state topic")
+						waypoint_driver::finished_state msgToSend;
+						msgToSend.current_latitude = curLatitude;
+						msgToSend.current_longitude = curLongitude;
+						msgToSend.reached_waypoint = true;
+						finished_publisher.publish(msgToSend);
 					}
 				}
 
