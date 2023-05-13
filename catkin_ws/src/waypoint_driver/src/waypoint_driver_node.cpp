@@ -43,7 +43,6 @@ void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
     if (onAJob) {
 		curHeading = msg->data;
 		// map heading 0-360
-		curHeading = curHeading + 360 % 360;
 		receivedHeading = true;
 	}
 }
@@ -161,8 +160,10 @@ int main(int argc, char **argv) {
 				// Map 0-360
 				desiredHeading = desiredHeading + 360 % 360;
 
+				float currentHeading = curHeading + 360 % 360;
+
 				// Find the two angles to turn
-				float cw = desiredHeading - curHeading;
+				float cw = desiredHeading - currentHeading;
 				cw = cw + 360 % 360;
 
 				float ccw = 360 - cw;
@@ -184,7 +185,7 @@ int main(int argc, char **argv) {
 				} else if (angularVelocity > MAXROTVEL) {
 					angularVelocity = MAXROTVEL;
 				}
-				ROS_INFO("Current heading is %f, desired heading is %f and rot vel is set to %f", curHeading, desiredHeading, angularVelocity);
+				ROS_INFO("Current heading is %f, desired heading is %f, angle to turn is %f and rot vel is set to %f", currentHeading, desiredHeading, angleToDrive, angularVelocity);
 				linearVelocity = 1;
 			}
 
