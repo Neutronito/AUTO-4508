@@ -1,4 +1,4 @@
 <launch>
     <!-- Nodes -->
-    <node name="stereo_test_node" pkg="stereo_camera_testing" type="tutorial_test_6.py"/>
+    <node name="stereo_test_node" pkg="stereo_camera_testing" type="object_detection.py"/>
 </launch>
