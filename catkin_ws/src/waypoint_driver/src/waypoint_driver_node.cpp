@@ -6,7 +6,7 @@
 #include "sensor_msgs/NavSatFix.h"
 #include <geometry_msgs/Twist.h>
 
-#define GOALTOLERANCE 0.0001
+#define GOALTOLERANCE 0.00001
 
 #define MAXROTVEL 2
 #define ROTSCALEFACTOR 0.0222	
@@ -54,7 +54,7 @@ void gps_callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
 bool drive_waypoint(waypoint_driver::gps_points::Request  &req, waypoint_driver::gps_points::Response &res) {
 	// Parse received data
 	double latitude = req.latitude;
-	double longitude = req.latitude;
+	double longitude = req.longitude;
 	ROS_INFO("received request of: lat=%f, long=%f", latitude, longitude);
 	if (currentlyDriving) {
 		ROS_INFO("I'm already driving, that waypoint request will be refused");
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 		if (currentlyDriving) {
 
 			// Check if new data has come through
-			if (receivedHeading && receivedCoords) {
+			if (receivedHeading) {
 				receivedHeading = false;
 				receivedCoords = false;
 
@@ -132,6 +132,8 @@ int main(int argc, char **argv) {
 					angleToDrive = 0 - ccw;
 				}
 
+				angleToDrive *= -1;
+
 				// Now set the angular velocity based on our angle
 				angularVelocity = angleToDrive * ROTSCALEFACTOR;
 
@@ -140,6 +142,8 @@ int main(int argc, char **argv) {
 				} else if (angularVelocity > MAXROTVEL) {
 					angularVelocity = MAXROTVEL;
 				}
+				ROS_INFO("Current heading is %f, desired heading is %f and rot vel is set to %f", curHeading, desiredHeading, angularVelocity);
+				linearVelocity = 1;
 			}
 
 			// Publish the speeds to rosaria cmd_vel
