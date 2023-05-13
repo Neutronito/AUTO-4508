@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import rospy
 import os
 import time
 import datetime
@@ -11,8 +12,8 @@ import numpy as np
 import blobconverter
 import json
 
-DEFAULT_PATH = str((Path(__file__).parent / Path('../models/640x416_coneslayer_6shave.blob')).resolve().absolute())
-CONFIG_PATH = str((Path(__file__).parent / Path('../config/640x416_coneslayer.json')).resolve().absolute())
+DEFAULT_PATH = str((Path(__file__).parent / Path('../models/best_openvino_2022.1_6shave.blob')).resolve().absolute())
+CONFIG_PATH = str((Path(__file__).parent / Path('../config/best.json')).resolve().absolute())
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("-m", "--model", help="Provide model name or model path for inference",
@@ -48,6 +49,8 @@ print(metadata)
 # parse labels
 nnMappings = config.get("mappings", {})
 labels = nnMappings.get("labels", {})
+
+rospy.logerr(labels)
 
 
 #log_file = open(f"log-{datetime.datetime.now().strftime('%H:%M:%S')}.csv", "a+")
@@ -201,10 +204,9 @@ with dai.Device(pipeline) as device:
             x2 = int(detection.xmax * width)
             y1 = int(detection.ymin * height)
             y2 = int(detection.ymax * height)
-            try:
-                label = "Cone"
-            except:
-                label = detection.label
+
+            label = labels[detection.label]
+            
             iter+=1
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
