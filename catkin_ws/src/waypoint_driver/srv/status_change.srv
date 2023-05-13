@@ -1,0 +1,5 @@
+bool pause
+bool terminate_current_drive
+---
+bool pause_state
+bool terminate_approved
