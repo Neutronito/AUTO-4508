@@ -61,7 +61,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
 
 
-    ros::Subscriber lidar_get = nh.subscribe("scan", 10, lidarCallback);
+    ros::Subscriber lidar_get = nh.subscribe("sick_tim_7xx/scan", 10, lidarCallback);
     lidar_pub = nh.advertise<std_msgs::Int16>("lidar_response", 10);
 
     ros::spin();
