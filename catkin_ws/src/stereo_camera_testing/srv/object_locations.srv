@@ -1,0 +1,11 @@
+bool dummy_var
+---
+bool found_cone
+bool found_bucket
+
+int cone_x
+int cone_y
+int cone_z
+int bucket_x
+int bucket_y
+int bucket_z
