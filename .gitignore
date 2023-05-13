@@ -1,6 +1,8 @@
 catkin_ws/build
 catkin_ws/devel
 
+catkin_ws/src/stereo_camera_testing/models
+
 sick_scan_ws/build_isolated
 sick_scan_ws/devel_isolated
 sick_scan_ws/install_isolated
