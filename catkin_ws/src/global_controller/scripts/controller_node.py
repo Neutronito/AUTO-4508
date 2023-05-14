@@ -4,7 +4,7 @@ import time
 from enum import Enum
 from sensor_msgs.msg import Joy
 from global_controller.msg import controller_states
-from waypoint_driver.srv import *
+from pioneer_driver.srv import *
 from drive_values.srv import *
 
 STATE_PUBLISH_RATE = 60

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>waypoint_driver</name>
+  <name>pioneer_driver</name>
   <version>0.0.0</version>
-  <description>The waypoint_driver package</description>
+  <description>The pioneer_driver package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -60,6 +60,9 @@
 
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
+
+  <build_depend>global_controller</build_depend>
+  <exec_depend>global_controller</exec_depend>
   
     
   <!-- The export tag contains other, unspecified, tags -->
