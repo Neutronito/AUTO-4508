@@ -158,9 +158,9 @@ int main(int argc, char **argv) {
 				desiredHeading = desiredHeading * 180 / M_PI;
 				
 				// Map 0-360
-				desiredHeading = desiredHeading + 360 % 360;
+				desiredHeading = (desiredHeading + 360) % 360;
 
-				float currentHeading = curHeading + 360 % 360;
+				float currentHeading = (curHeading + 360) % 360;
 
 				// Find the two angles to turn
 				float cw = desiredHeading - currentHeading;
