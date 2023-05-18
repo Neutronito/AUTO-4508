@@ -1,0 +1,5 @@
+<launch>
+        <node name="RosAria" pkg="rosaria" type="RosAria" args="_port:=/dev/ttyS1"/>
+        <node name="stereo_test_node" pkg="stereo_camera_testing" type="stereo_camera.py" output="screen"/>
+        <node name="cone_driving_detection_node" pkg="pioneer_driver" type="cone_driving_detection_node" output="screen"/>
+</launch>
