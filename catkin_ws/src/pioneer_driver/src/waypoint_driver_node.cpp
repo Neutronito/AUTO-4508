@@ -4,6 +4,7 @@
 #include "waypoint_driver/gps_points.h"
 #include "waypoint_driver/status_change.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Int16.h"
 #include "std_msgs/Bool.h"
 #include "sensor_msgs/NavSatFix.h"
 #include <geometry_msgs/Twist.h>
@@ -32,6 +33,9 @@ bool receivedCoords = false;
 float linearVelocity = 0;
 float angularVelocity = 0;
 
+int lidar_response = 0;
+bool lidar_controlling = false;
+
 // 1 topics, 2 service
 
 // First service is used to initialize way point driving, if driving is already underway false is returned as an error.
@@ -56,6 +60,13 @@ void gps_callback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
 	}
 }
 
+// Execute lidar avoidance stuff
+void lidar_callback(const std_msgs::Int16::ConstPtr& msg) {
+	lidar_response = msg->data;
+
+	// Lidar only takes control when an obstacle is detected
+	lidar_controlling = (lidar_response != 0);
+}
 
 bool drive_waypoint(waypoint_driver::gps_points::Request  &req, waypoint_driver::gps_points::Response &res) {
 	// Parse received data
@@ -113,6 +124,8 @@ int main(int argc, char **argv) {
 	ros::Subscriber imu_subscriber = waypoint_handle.subscribe("imu_heading", 10, imu_heading_callback);
 	// Subscribe to gps
 	ros::Subscriber gps_subscriber = waypoint_handle.subscribe("fix", 10, gps_callback);
+	// Subscribe to lidar
+	ros::Subscriber lidar_subscriber = waypoint_handle.subscribe("lidar_response", 10, lidar_callback);
 
 	// Setup publishing to rosaria cmd_vel
 	ros::Publisher velocity_publisher = waypoint_handle.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 10);
@@ -131,62 +144,92 @@ int main(int argc, char **argv) {
 		
 		// Check if we are currently driving
 		if (onAJob && !pausedDriving && deadman_pressed) {
-			// Check if new data has come through
-			if (receivedHeading) {
-				receivedHeading = false;
-				receivedCoords = false;
 
-				// Check if we are at the goal
-				if (curLatitude > requestLatitude - GOALTOLERANCE && curLatitude < requestLatitude + GOALTOLERANCE) {
-					if (curLongitude > requestLongitude - GOALTOLERANCE && curLongitude < requestLongitude + GOALTOLERANCE) {
-						ROS_INFO("We have reached our desired coordinates");
-						linearVelocity = 0;
-						angularVelocity = 0;
-						onAJob = false;
-						
-						ROS_INFO("Publishing information to finished state topic");
-						waypoint_driver::finished_state msgToSend;
-						msgToSend.current_latitude = curLatitude;
-						msgToSend.current_longitude = curLongitude;
-						msgToSend.reached_waypoint = true;
-						finished_publisher.publish(msgToSend);
-					}
-				}
+			// Check if we are obstacle avoiding
+			if (lidar_controlling) {
 
-				// Find the heading we need to drive at
-				float desiredHeading = atan2(cos(requestLatitude) * sin(requestLongitude - curLongitude), cos(curLatitude) * sin(requestLatitude) - sin(curLatitude) * cos(requestLatitude) * cos(requestLongitude - curLongitude));
-				desiredHeading = desiredHeading * 180 / M_PI;
+				// Veer right, obstacle on the left 
+				if (lidar_response == -1) {
+					angularVelocity = -0.5;
+					linearVelocity = 1;
+				} 
 				
-				// Map 0-360
-				desiredHeading = (desiredHeading + 360) % 360;
-
-				float currentHeading = (curHeading + 360) % 360;
-
-				// Find the two angles to turn
-				float cw = desiredHeading - currentHeading;
-				cw = cw + 360 % 360;
-
-				float ccw = 360 - cw;
-
-				// Take the smallest angle
-				float angleToDrive = cw;
-
-				if (ccw < cw) {
-					angleToDrive = 0 - ccw;
+				// Veer left, obstacle on right
+				else if (lidar_response == 1) {
+					angularVelocity = 0.5;
+					linearVelocity = 1;
 				}
 
-				angleToDrive *= -1;
+				// Obstacle in front, I've chosen to turn right away instead of left (no specific reason)
+				else if (lidar_response == 2) {
+					linearVelocity = 0;
+					angularVelocity = 1;
+				} 
+			}
 
-				// Now set the angular velocity based on our angle
-				angularVelocity = angleToDrive * ROTSCALEFACTOR;
+			else {
+				// Check if new data has come through
+				if (receivedHeading) {
+					receivedHeading = false;
+					receivedCoords = false;
 
-				if (angularVelocity < (0 - MAXROTVEL)) {
-					angularVelocity = 0 - MAXROTVEL;
-				} else if (angularVelocity > MAXROTVEL) {
-					angularVelocity = MAXROTVEL;
+					// Check if we are at the goal
+					if (curLatitude > requestLatitude - GOALTOLERANCE && curLatitude < requestLatitude + GOALTOLERANCE) {
+						if (curLongitude > requestLongitude - GOALTOLERANCE && curLongitude < requestLongitude + GOALTOLERANCE) {
+							ROS_INFO("We have reached our desired coordinates");
+							linearVelocity = 0;
+							angularVelocity = 0;
+							onAJob = false;
+							
+							ROS_INFO("Publishing information to finished state topic");
+							waypoint_driver::finished_state msgToSend;
+							msgToSend.current_latitude = curLatitude;
+							msgToSend.current_longitude = curLongitude;
+							msgToSend.reached_waypoint = true;
+							finished_publisher.publish(msgToSend);
+						}
+					}
+
+					// Find the heading we need to drive at, arctan doesnt map positive clockwise but somehow this formula does work and will map heading correctly.
+					float desiredHeadingRad = atan2(cos(requestLatitude) * sin(requestLongitude - curLongitude), cos(curLatitude) * sin(requestLatitude) - sin(curLatitude) * cos(requestLatitude) * cos(requestLongitude - curLongitude));
+					int desiredHeading = (int)(desiredHeadingRad * 180.0 / M_PI);
+					
+					// Map 0-360
+					desiredHeading = (desiredHeading + 360) % 360;
+
+					int currentHeading = ((int)curHeading + 360) % 360;
+
+					// Find the two angles to turn
+					int cw = desiredHeading - currentHeading;
+					cw = (cw + 360) % 360;
+
+					int ccw = 360 - cw;
+
+					// Take the smallest angle
+					int angleToDrive = cw;
+
+					if (ccw < cw) {
+						angleToDrive = 0 - ccw;
+					}
+
+					angleToDrive *= -1;
+
+					// Now set the angular velocity based on our angle
+					angularVelocity = (float)angleToDrive * ROTSCALEFACTOR;
+
+					if (angularVelocity < (0 - MAXROTVEL)) {
+						angularVelocity = 0 - MAXROTVEL;
+					} else if (angularVelocity > MAXROTVEL) {
+						angularVelocity = MAXROTVEL;
+					}
+					ROS_INFO("Current heading is %d, desired heading is %d, angle to turn is %d and rot vel is set to %f", currentHeading, desiredHeading, angleToDrive, angularVelocity);
+					
+					// If we are turning fast, we should reduce our linear velocity to not overtorque the battery
+					linearVelocity = 2 - abs(angularVelocity);
+					
+					// Don't allow the linear velocity to be greater than 1
+					if (linearVelocity > 1) linearVelocity == 1;
 				}
-				ROS_INFO("Current heading is %f, desired heading is %f, angle to turn is %f and rot vel is set to %f", currentHeading, desiredHeading, angleToDrive, angularVelocity);
-				linearVelocity = 1;
 			}
 
 			// Publish the speeds to rosaria cmd_vel
