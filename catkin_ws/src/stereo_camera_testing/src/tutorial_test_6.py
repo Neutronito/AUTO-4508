@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import rospy
+from stereo_camera_testing.msg import *
+
 import os
 import time
 import datetime
@@ -132,8 +134,11 @@ stereo.depth.link(spatialDetectionNetwork.inputDepth)
 spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 
+rospy.init_node("stereo_camera", anonymous=False)
+pub = rospy.Publisher('stereo_camera_testing/objects', objects, queue_size=1)
+
 # Connect to device and start pipeline
-with dai.Device(pipeline) as device:
+with dai.Device(pipeline, usb2Mode=True) as device:
 
     # Output queues will be used to get the rgb frames and nn data from the outputs defined above
     previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -191,6 +196,40 @@ with dai.Device(pipeline) as device:
                 ymax = int(bottomRight.y)
 
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
+
+        found_cone = False
+        found_bucket = False
+        cone_info = [-1, -1, -1]
+        bucket_info = [-1, -1, -1]
+
+        detections = inDet.detections
+        if len(detections) != 0:
+            for detection in detections:
+                rospy.loginfo("TROLLOLOLOL")
+                coords = detection.spatialCoordinates
+                x, y, z = coords.x, coords.y, coords.z
+                if detection.label == 1:
+                    found_cone = True
+                    cone_info = [x, y, z]
+                elif detection.label == 0:
+                    found_bucket = True
+                    bucket_info = [x, y, z]
+
+        msg = objects()
+
+        msg.found_bucket = found_bucket
+        msg.found_cone = found_cone
+
+        msg.cone_x = int(cone_info[0])
+        msg.cone_y = int(cone_info[1])
+        msg.cone_z = int(cone_info[2])
+
+        msg.bucket_x = int(bucket_info[0])
+        msg.bucket_y= int(bucket_info[1])
+        msg.bucket_z = int(bucket_info[2])
+
+        pub.publish(msg)
+        # rospy.Rate(0.5).sleep()
 
 
         # If the frame is available, draw bounding boxes on it and show the frame
