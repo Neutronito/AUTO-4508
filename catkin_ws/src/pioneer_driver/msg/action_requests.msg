@@ -1,0 +1,3 @@
+bool start_cone_detection
+bool pause_cone_detection
+bool terminate_current_detection
