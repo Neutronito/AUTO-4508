@@ -50,6 +50,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   finished_state.msg
+  action_requests.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -136,6 +137,7 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/waypoint_driver_node.cpp)
 add_executable(waypoint_driver_node src/waypoint_driver_node.cpp)
 add_executable(remote_driver_node src/remote_robot_driving.cpp)
+add_executable(cone_driving_detection_node src/cone_driving_detection.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -143,18 +145,21 @@ add_executable(remote_driver_node src/remote_robot_driving.cpp)
 ## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-add_dependencies(waypoint_driver_node pioneer_driver_generate_messages_cpp pioneer_driver_gencpp)
-add_dependencies(remote_driver_node pioneer_driver_generate_messages_cpp pioneer_driver_gencpp)
-
-
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(waypoint_driver_node ${catkin_LIBRARIES})
 target_link_libraries(remote_driver_node ${catkin_LIBRARIES})
+target_link_libraries(cone_driving_detection_node ${catkin_LIBRARIES})
+
+
+## Add cmake target dependencies of the executable
+## same as for the library above
+add_dependencies(waypoint_driver_node pioneer_driver_generate_messages_cpp pioneer_driver_gencpp)
+add_dependencies(remote_driver_node pioneer_driver_generate_messages_cpp pioneer_driver_gencpp)
+add_dependencies(cone_driving_detection_node pioneer_driver_generate_messages_cpp pioneer_driver_gencpp)
+
 
 #############
 ## Install ##
