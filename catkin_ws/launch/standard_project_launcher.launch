@@ -9,11 +9,16 @@
     
     <node name="RosAria" pkg="rosaria" type="RosAria" args="_port:=/dev/ttyS1"/>
 
+    <!-- Launch the sick scan lidar package to parse lidar input -->
+    <include file="$(find sick_scan)/launch/sick_tim_7xx.launch"/>
+
+    <node name="lidar_response_node" pkg="lidar_calcs" type="lidar_response_node"/>
+
     <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/waypoints.txt" output="screen"/> 
 
-    <node name="waypoint_driver_node" pkg="pioneer_driver" type="waypoint_driver_node"/>
-
     <node name="imu_publisher_node" pkg="imu_reader" type="imu_publisher_node.py"/>
+
+    <node name="waypoint_driver_node" pkg="pioneer_driver" type="waypoint_driver_node" output="screen"/>
 
     <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" args="_baud:=9600 _port:=/dev/ttyACM0"/>
 
