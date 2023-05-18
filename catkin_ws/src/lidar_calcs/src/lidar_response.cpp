@@ -10,12 +10,12 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     std_msgs::Int16 lidar_response;
     lidar_response.data = 0;
 
-    float thres = 1.f;          //threshold set to 1m
+    float thres = 3.f;          //threshold set to 1m
     int size = msg->ranges.size();
 
     //Start points for the 3 thirds of the lidar
     int mid = size/2;
-    float angle_increment = 180*(msg->angle_increment)/M_PI;
+    float angle_increment = 180*(msg->angle_increment)/M_PI; //Normally 0.33 degrees
     int left_start = mid - abs(30/angle_increment);
     int left_end = mid - abs(10/angle_increment);
     int right_start = mid + abs(10/angle_increment);
@@ -25,9 +25,9 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     //Check the left third
     for(int i = left_start; i < left_end; i++)
     {
-        if(msg->ranges[i] < thres)
+        if(msg->ranges[i] < thres && msg->ranges[i] > 0.05)
         {
-            lidar_response.data = -1;
+            lidar_response.data = 1;
             break;
         }
     }
@@ -35,9 +35,9 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     //Check the right third
     for(int i = right_start; i < right_end; i++)
     {
-        if(msg->ranges[i] < thres)
+        if(msg->ranges[i] < thres && msg->ranges[i] > 0.05)
         {
-            lidar_response.data = 1;
+            lidar_response.data = -1;
             break;
         }
     }
@@ -45,12 +45,14 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     //Check the middle third
     for(int i = left_end; i < right_start; i++)
     {
-        if(msg->ranges[i] < thres)
+        if(msg->ranges[i] < thres && msg->ranges[i] > 0.05)
         {
             lidar_response.data = 2;
             break;
         }
     }
+
+    // Nowcheck yomama
     
     // 1 obstacle on right, -1 obstacle on left, 2 obstacle in front, 0 no obstacle wooohoooo
     lidar_pub.publish(lidar_response);
