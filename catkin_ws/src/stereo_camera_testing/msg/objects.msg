@@ -1,5 +1,3 @@
-bool dummy_var
----
 bool found_cone
 bool found_bucket
 
