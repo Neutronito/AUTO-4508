@@ -63,6 +63,9 @@
 
   <build_depend>global_controller</build_depend>
   <exec_depend>global_controller</exec_depend>
+
+  <build_depend>stereo_camera_testing</build_depend>
+  <exec_depend>stereo_camera_testing</exec_depend>
   
     
   <!-- The export tag contains other, unspecified, tags -->
