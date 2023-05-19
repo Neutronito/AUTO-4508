@@ -6,6 +6,7 @@ from sensor_msgs.msg import Joy
 from global_controller.msg import controller_states
 from pioneer_driver.srv import *
 from drive_values.srv import *
+from pioneer_driver.msg import *
 
 STATE_PUBLISH_RATE = 60
 TOGGLE_MINIMUM_INTERVAL = 1 # 1 second
@@ -18,6 +19,9 @@ class TheFatController:
 
 	# GPS Coordinates represented as a list of tuples
 	coordinates = []
+
+	# cone detection topic publisher
+	cone_detection_publisher = None
 
 	# Defines if we have reached our target or not
 	reached_target = False
@@ -56,7 +60,7 @@ class TheFatController:
 			self.coordinates.append((lat, lng))
 
 		# Now print the coordinates
-		rospy.loginfo("Read the following coordinates:")
+		rospy.loginfo("Read the following coordinates: ")
 		for coord_tuple in self.coordinates:
 			rospy.loginfo(coord_tuple)
 
@@ -64,9 +68,14 @@ class TheFatController:
 		waypoint_file.close()
 		return
 
+	def waypoint_finished_callback(self, data):
+		self.reached_target = True
+
 	# Subscribe to the joystick topic
-	def listen_to_joystick(self):
+	def setup_subs_and_pubs(self):
 		rospy.Subscriber("joy", Joy, self.update_states)
+		self.cone_detection_publisher = rospy.Publisher('cone_driving_detection/action_requests', action_requests, queue_size=5)
+		rospy.Subscriber('waypoint_driver/finished_state', finished_state, self.waypoint_finished_callback)
 		return
 
 	# Update internal state based on joystick settings
@@ -128,8 +137,26 @@ class TheFatController:
 			# Wait for the target to be reached, loop runs at a rate of 10Hz
 			rate = rospy.Rate(10) # 10hz
 
+			# Now run the cone detection node
+			msg = action_requests
+			msg.start_cone_detection = True
+			msg.pause_cone_detection = False
+			msg.terminate_current_detection = False
+			self.cone_detection_publisher.publish(msg)
+			rospy.loginfo("Sent request to cone detection node")
+
+			self.reached_target = False
+
 			while (self.reached_target is False):
 				rate.sleep()
+
+			# Now run the cone detection node
+			msg = action_requests
+			msg.start_cone_detection = True
+			msg.pause_cone_detection = False
+			msg.terminate_current_detection = False
+			self.cone_detection_publisher.publish(msg)
+
 
 
 	# Client for feeding gps coords
@@ -184,7 +211,7 @@ if __name__ == '__main__':
 
 	# I'll be honest the class is not really necessary here
 	master = TheFatController(sys.argv[1])
-	master.listen_to_joystick()
+	master.setup_subs_and_pubs()
 	master.feed_waypoints()
 	rospy.spin()
 
