@@ -22,7 +22,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     int right_start = mid + abs(10/angle_increment);
     int right_end = mid + abs(30/angle_increment);
 
-    //Check the right third
+    //Check the left third
     for(int i = left_start; i < left_end; i++)
     {
         //Long range avoidance
@@ -33,7 +33,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
         }
     }
 
-    //Check the left third
+    //Check the right third
     for(int i = right_start; i < right_end; i++)
     {
         //Long range avoidance
@@ -49,7 +49,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     {
         if(msg->ranges[i] < thres_short && msg->ranges[i] > 0.05)
         {
-            lidar_response.data = -1;
+            lidar_response.data = 1;
             break;
         }
     }
@@ -59,7 +59,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     {
         if(msg->ranges[i] < thres_short && msg->ranges[i] > 0.05)
         {
-            lidar_response.data = 1;
+            lidar_response.data = -1;
             break;
         }
     }
@@ -77,7 +77,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     
     // Nowcheck yomama
     
-    // 1 obstacle on right, -1 obstacle on left, 2 obstacle in front, 0 no obstacle wooohoooo
+    // -1 obstacle on right, 1 obstacle on left, 2 obstacle in front, 0 no obstacle wooohoooo
     lidar_pub.publish(lidar_response);
 }
 
