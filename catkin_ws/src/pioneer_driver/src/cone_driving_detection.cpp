@@ -52,12 +52,11 @@ int main(int argc, char **argv) {
 
     // Setup client for camera recognition
     ros::ServiceClient client = cone_handle.serviceClient<stereo_camera_testing::object_locations>("stereo_camera_testing/object_locations");
-
+    
     // Run at 10Hz
     ros::Rate loopRate(10);
     
-    // I ADDED THIS TO MAKE IT RUN
-    // COMMAND LISTENER SUBSCRIBER SEEMS TO NOT GET TOPIC MESSAGES
+    ROS_INFO("Cone driving detection node successfully initialized");
 
     while (ros::ok()){
 
@@ -65,7 +64,6 @@ int main(int argc, char **argv) {
         
         // Check if I'm on a job and not paused
         if (onAJob && !currentlyPaused) {
-            // ROS_INFO("WGAOSJD");
 
             // I'm currently rotating
             if (state == 0) {
@@ -77,20 +75,26 @@ int main(int argc, char **argv) {
                     ROS_INFO("Cone driver is requesting an image from the stereo node");
                     stereo_camera_testing::object_locations camSrv;
                     camSrv.request.dummy_var = true;
-
-                    if (client.call(camSrv)) {
-                        ROS_INFO("Success calling object_locations service");
-
-                        // cone has been detected
-                        if (camSrv.response.found_cone) {
-                            ROS_INFO("A cone has been found, exiting state one");
-                            onAJob = false;
+                    
+                    // Call 10 times for dummy run
+                    for (int i = 0; i < 10; i++) {
+                        if (client.call(camSrv)) {
                         } else {
-                            ROS_INFO("Failed to find a cone, I will keep rotating");
+                            ROS_ERROR("Failed to call service object_locations");
                         }
-                    } else {
-                        ROS_ERROR("Failed to call service object_locations");
                     }
+                    // Final good call
+                    if (client.call(camSrv)) {
+                            if (camSrv.response.found_cone) {
+                                ROS_INFO("A cone has been found, exiting state one");
+                                onAJob = false;
+                            } else {
+                                ROS_INFO("No cone found, continuing rotation");
+                            }
+                        } else {
+                            ROS_ERROR("Failed to call service object_locations");
+                        }
+
                     takeAnImage = false;                    
                 } 
                 // Check if I'm not rotating on the spot, and if not start doing it
@@ -105,7 +109,7 @@ int main(int argc, char **argv) {
                     double elapsedTimeMillis = (clock() - rotatingStartTime) / (CLOCKS_PER_SEC / 1000);
                     
                     // TODO: Fix this value, it is not scaled to milliseconds properly
-                    if (elapsedTimeMillis > 1) {
+                    if (elapsedTimeMillis > 5) {
                         angularVelocity = 0;
                         onSpotRotating = false;
                         takeAnImage = true;
