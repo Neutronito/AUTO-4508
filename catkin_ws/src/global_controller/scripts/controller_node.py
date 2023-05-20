@@ -21,7 +21,7 @@ class TheFatController:
 	coordinates = []
 
 	# cone detection topic publisher
-	cone_detection_publisher = None
+	cone_detection_publisher = rospy.Publisher
 
 	# Defines if we have reached our target or not
 	reached_target = False
@@ -137,25 +137,19 @@ class TheFatController:
 			# Wait for the target to be reached, loop runs at a rate of 10Hz
 			rate = rospy.Rate(10) # 10hz
 
-			# Now run the cone detection node
-			msg = action_requests
-			msg.start_cone_detection = True
-			msg.pause_cone_detection = False
-			msg.terminate_current_detection = False
-			self.cone_detection_publisher.publish(msg)
-			rospy.loginfo("Sent request to cone detection node")
-
 			self.reached_target = False
 
 			while (self.reached_target is False):
 				rate.sleep()
 
 			# Now run the cone detection node
-			msg = action_requests
+			msg = action_requests()
 			msg.start_cone_detection = True
 			msg.pause_cone_detection = False
 			msg.terminate_current_detection = False
 			self.cone_detection_publisher.publish(msg)
+			while (True):
+				rate.sleep()
 
 
 
