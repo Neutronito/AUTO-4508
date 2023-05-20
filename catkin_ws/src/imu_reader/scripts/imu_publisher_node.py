@@ -30,7 +30,7 @@ def main():
 	spatial_channel = Spatial()
 
 	#Set addressing parameters to specify which channel to open (if any)
-	spatial_channel.setDeviceSerialNumber(373542)
+	spatial_channel.setDeviceSerialNumber(373407)
 
 	#Assign any event handlers you need before calling open so that no events are missed
 	spatial_channel.setOnAlgorithmDataHandler(onAlgorithmData)
