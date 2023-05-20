@@ -1,6 +1,10 @@
 <launch>
     <!-- Nodes -->
 
+    <node name="stereo_test_node" pkg="stereo_camera_testing" type="stereo_camera.py" output="screen"/>
+
+    <node name="cone_driving_detection_node" pkg="pioneer_driver" type="cone_driving_detection_node" output="screen"/>
+
     <node name="joy_node" pkg="joy" type="joy_node">
         <param name="autorepeat_rate" value="60" type="double"/>
     </node>
@@ -21,10 +25,6 @@
     <node name="waypoint_driver_node" pkg="pioneer_driver" type="waypoint_driver_node" output="screen"/>
 
     <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" args="_baud:=9600 _port:=/dev/ttyACM0"/>
-
-    <node name="stereo_test_node" pkg="stereo_camera_testing" type="stereo_camera.py" output="screen"/>
-
-    <node name="cone_driving_detection_node" pkg="pioneer_driver" type="cone_driving_detection_node" output="screen"/>
     
     <!-- Axes -->
     <param name="axis_linear" value="1" type="int"/>
