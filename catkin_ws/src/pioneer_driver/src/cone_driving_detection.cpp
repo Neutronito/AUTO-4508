@@ -3,6 +3,8 @@
 #include "pioneer_driver/action_requests.h"
 #include <time.h>
 #include <geometry_msgs/Twist.h>
+#include <nav_msgs/Odometry.h>
+#include <std_msgs/Float64.h>
 
 // Driving stuff
 float linearVelocity = 0;
@@ -12,14 +14,36 @@ float angularVelocity = 0;
 bool onAJob = false;
 bool currentlyPaused = false;
 
-// State 0 indicates rotating on the stop to find a cone
+// State 0 indicates rotating on the stop to find a cone or bucket
+// State 1 indicates positioning and obtaining the distance of the cone
+// State 2 indicates positioning and obtaining the distance of a bucket
 int state = 0;
+
+// Recording variables for cone
+int coneDistance = 0;
+bool coneFound = false;
+float coneAngle = 0;
+
+// Recording variables for bucket
+int bucketDistance = 0;
+bool bucketFound = 0;
+float bucketAngle = 0;
+
+// Note, this orientation is 0 to 360 clockwise with 0 North
+int currentOrientation = 0;
+
+// Formula for quaternion
+//https://robotics.stackexchange.com/questions/16471/get-yaw-from-quaternion
 
 // This is for task 0, indicates whether we should start rotating or take a photo and a timer
 bool onSpotRotating = false;
 bool takeAnImage = false;
 double rotatingStartTime;
-#define ROTATION_DURATION
+double timeToSpendRotating = 0;
+
+// Positioning stuff
+#define IMAGE_CENTRE_X 400
+#define CENTRE_TOLERANCE 20
 
 
 // Received a command from an external node
@@ -34,11 +58,20 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
     // Deal with pausing
     currentlyPaused = msg->pause_cone_detection;
     // Deal with terminating a job
-    if (msg->terminate_current_detection) {
+    if (msg->terminate_current_detection) { 
         onAJob = false;
         ROS_INFO("Terminating cone job");
     }
-} 
+}
+
+// Gets the imu heading
+void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
+    if (onAJob) {
+		currentOrientation = (int)msg->data;
+        // Map to 0 - 360
+        currentOrientation = (currentOrientation + 360) % 360;
+	}
+}
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "cone_driving_detection");
@@ -52,6 +85,9 @@ int main(int argc, char **argv) {
 
     // Setup client for camera recognition
     ros::ServiceClient client = cone_handle.serviceClient<stereo_camera_testing::object_locations>("stereo_camera_testing/object_locations");
+
+    // Subscribe to imu to get our current heading
+	ros::Subscriber imu_subscriber = cone_handle.subscribe("imu_heading", 10, imu_heading_callback);
     
     // Run at 10Hz
     ros::Rate loopRate(10);
@@ -59,13 +95,11 @@ int main(int argc, char **argv) {
     ROS_INFO("Cone driving detection node successfully initialized");
 
     while (ros::ok()){
-
-        
         
         // Check if I'm on a job and not paused
         if (onAJob && !currentlyPaused) {
 
-            // I'm currently rotating
+            // Rotating finding cone state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (state == 0) {
 
                 
@@ -76,20 +110,18 @@ int main(int argc, char **argv) {
                     stereo_camera_testing::object_locations camSrv;
                     camSrv.request.dummy_var = true;
                     
-                    // Call 10 times for dummy run
-                    for (int i = 0; i < 10; i++) {
-                        if (client.call(camSrv)) {
-                        } else {
-                            ROS_ERROR("Failed to call service object_locations");
-                        }
-                    }
-                    // Final good call
+                    // Check if we have found an object
                     if (client.call(camSrv)) {
+
+                        // Check if we have found a cone
                             if (camSrv.response.found_cone) {
-                                ROS_INFO("A cone has been found, exiting state one");
-                                onAJob = false;
+                                ROS_INFO("A cone has been found, moving to state one");
+                                state = 1;
+                            } else if (camSrv.response.found_bucket) {
+                                ROS_INFO("A bucket has been found, moving to state two");
+                                state = 2;
                             } else {
-                                ROS_INFO("No cone found, continuing rotation");
+                                ROS_INFO("No object found, continuing rotation");
                             }
                         } else {
                             ROS_ERROR("Failed to call service object_locations");
@@ -102,20 +134,149 @@ int main(int argc, char **argv) {
                     onSpotRotating = true;
                     linearVelocity = 0;
                     angularVelocity = 1;
-                    rotatingStartTime = clock();
+
+                    
+                    struct timespec currentTime;
+                    clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                    rotatingStartTime = currentTime.tv_sec * 1000 ;
                 }
                 // I'm rotating on the spot, stop after 500 milliseconds
                 else {
-                    double elapsedTimeMillis = (clock() - rotatingStartTime) / (CLOCKS_PER_SEC / 1000);
+
+                    struct timespec currentTime;
+                    clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                    double elapsedTimeMillis = (currentTime.tv_sec * 1000 - rotatingStartTime);
                     
-                    // TODO: Fix this value, it is not scaled to milliseconds properly
-                    if (elapsedTimeMillis > 5) {
+                    // Stop rotating
+                    if (elapsedTimeMillis > 500) {
                         angularVelocity = 0;
-                        onSpotRotating = false;
+                    }
+
+                    // Give the robot some time to stop rotating
+                    if (elapsedTimeMillis > 1000) {
+                    onSpotRotating = false;
                         takeAnImage = true;
                     }
                 }
 
+            } 
+            
+            // We are trying to find the position of the cone~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            else if (state == 1) {
+                
+                // We are not rotating, so that means we should take an image now
+                if (!onSpotRotating) {
+                
+                    stereo_camera_testing::object_locations camSrv;
+                    camSrv.request.dummy_var = true;
+                    
+                    // Call the service to obtain the position of the cone
+                    if (client.call(camSrv)) {
+                        int coneX = camSrv.response.cone_x;
+
+                        // Find out how far the cone is from centre
+                        int centre_offset = IMAGE_CENTRE_X - coneX;
+
+                        //Check if the cone is close enough to the centre or not
+                        if (abs(centre_offset) < CENTRE_TOLERANCE) {
+                            // Put in dummy code to find the lidar
+                        }
+
+                        // If not, figure out how long we should rotate for
+                        // negative offset means cone is to the right, which is a negativ rotation (clockwise) so sign works out nicely
+                        timeToSpendRotating = abs(centre_offset) * 100;
+                        if (centre_offset < 0) {
+                            angularVelocity = -1;
+                        } else {
+                            angularVelocity = 1;
+                        }
+                        onSpotRotating = true;
+                        
+                        // Set the start time
+                        struct timespec currentTime;
+                        clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                        rotatingStartTime = currentTime.tv_sec * 1000 ;                
+
+                    } else {
+                        ROS_ERROR("Failed to call service object_locations");
+                    }
+                } 
+                
+                // We are currently rotating on the spot, stop after the set time has passed
+                else {
+                    struct timespec currentTime;
+                    clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                    double elapsedTimeMillis = (currentTime.tv_sec * 1000 - rotatingStartTime);
+                    
+                    // Stop rotating
+                    if (elapsedTimeMillis > timeToSpendRotating) {
+                        angularVelocity = 0;
+                    }
+
+                    // Give the robot some time to stop rotating
+                    if (elapsedTimeMillis > (timeToSpendRotating + 500)) {
+                        onSpotRotating = false;
+                    }
+                }
+
+            } 
+            
+            // We are trying to find the position of the bucket~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            else if (state == 2) {
+                // We are not rotating, so that means we should take an image now
+                if (!onSpotRotating) {
+                
+                    stereo_camera_testing::object_locations camSrv;
+                    camSrv.request.dummy_var = true;
+                    
+                    // Call the service to obtain the position of the cone
+                    if (client.call(camSrv)) {
+                        int bucketX = camSrv.response.bucket_x;
+
+                        // Find out how far the cone is from centre
+                        int centre_offset = IMAGE_CENTRE_X - bucketX;
+
+                        //Check if the cone is close enough to the centre or not
+                        if (abs(centre_offset) < CENTRE_TOLERANCE) {
+                            // Put in dummy code to find the lidar
+                        }
+
+                        // If not, figure out how long we should rotate for
+                        // negative offset means cone is to the right, which is a negativ rotation (clockwise) so sign works out nicely
+                        timeToSpendRotating = abs(centre_offset) * 100;
+                        if (centre_offset < 0) {
+                            angularVelocity = -1;
+                        } else {
+                            angularVelocity = 1;
+                        }
+                        onSpotRotating = true;
+                        
+                        // Set the start time
+                        struct timespec currentTime;
+                        clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                        rotatingStartTime = currentTime.tv_sec * 1000 ;                
+
+                    } else {
+                        ROS_ERROR("Failed to call service object_locations");
+                    }
+                } 
+                
+                // We are currently rotating on the spot, stop after the set time has passed
+                else {
+                    struct timespec currentTime;
+                    clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
+                    double elapsedTimeMillis = (currentTime.tv_sec * 1000 - rotatingStartTime);
+                    
+                    // Stop rotating
+                    if (elapsedTimeMillis > timeToSpendRotating) {
+                        angularVelocity = 0;
+                    }
+
+                    // Give the robot some time to stop rotating
+                    if (elapsedTimeMillis > (timeToSpendRotating + 500)) {
+                        onSpotRotating = false;
+                    }
+                }
             }
 
             // Publish the speeds to rosaria cmd_vel
