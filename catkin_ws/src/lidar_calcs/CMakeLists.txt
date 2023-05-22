@@ -8,7 +8,9 @@ project(lidar_calcs)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp std_msgs
+  roscpp 
+  std_msgs
+  message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -52,11 +54,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  front_object_distance.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -65,11 +66,11 @@ find_package(catkin REQUIRED COMPONENTS
 #   Action2.action
 # )
 
-## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+# Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  std_msgs  # Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -105,6 +106,7 @@ catkin_package(
 #  LIBRARIES lidar_calcs
 #  CATKIN_DEPENDS roscpp
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 ###########
@@ -192,6 +194,7 @@ include_directories(
 
 add_executable(lidar_response_node src/lidar_response.cpp)
 target_link_libraries(lidar_response_node ${catkin_LIBRARIES})
+add_dependencies(lidar_response_node lidar_calcs_gencpp)
 
 #############
 ## Testing ##
