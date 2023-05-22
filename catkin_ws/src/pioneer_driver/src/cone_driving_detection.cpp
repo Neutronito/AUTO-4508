@@ -1,10 +1,12 @@
 #include "ros/ros.h"
 #include "stereo_camera_testing/object_locations.h"
 #include "pioneer_driver/action_requests.h"
+#include "pioneer_driver/object_detection_finished.h"
 #include <time.h>
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float64.h>
+#include "lidar_calcs/front_object_distance.h"
 
 // Driving stuff
 float linearVelocity = 0;
@@ -83,11 +85,17 @@ int main(int argc, char **argv) {
     // Setup publishing to rosaria cmd_vel
 	ros::Publisher velocity_publisher = cone_handle.advertise<geometry_msgs::Twist>("RosAria/cmd_vel", 10);
 
+    // Setup publishing to finished state
+    ros::Publisher finished_publisher = cone_handle.advertise<pioneer_driver::object_detection_finished>("cone_driving_detection/finished_state", 10);
+    
     // Setup client for camera recognition
-    ros::ServiceClient client = cone_handle.serviceClient<stereo_camera_testing::object_locations>("stereo_camera_testing/object_locations");
+    ros::ServiceClient camera_client = cone_handle.serviceClient<stereo_camera_testing::object_locations>("stereo_camera_testing/object_locations");
 
     // Subscribe to imu to get our current heading
 	ros::Subscriber imu_subscriber = cone_handle.subscribe("imu_heading", 10, imu_heading_callback);
+
+    // Setup client for distance finding
+    ros::ServiceClient distance_client = cone_handle.serviceClient<lidar_calcs::front_object_distance>("lidar_response_node/get_front_object_distance");
     
     // Run at 10Hz
     ros::Rate loopRate(10);
@@ -99,8 +107,14 @@ int main(int argc, char **argv) {
         // Check if I'm on a job and not paused
         if (onAJob && !currentlyPaused) {
 
-            // Rotating finding cone state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Rotating finding cone or bucket state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (state == 0) {
+
+                // Check if we have finished
+                if (coneFound && bucketFound) {
+                    // Publish information finish information
+
+                }
 
                 
                 // Check if I need to take a photo
@@ -111,7 +125,7 @@ int main(int argc, char **argv) {
                     camSrv.request.dummy_var = true;
                     
                     // Check if we have found an object
-                    if (client.call(camSrv)) {
+                    if (camera_client.call(camSrv)) {
 
                         // Check if we have found a cone
                             if (camSrv.response.found_cone) {
@@ -171,7 +185,7 @@ int main(int argc, char **argv) {
                     camSrv.request.dummy_var = true;
                     
                     // Call the service to obtain the position of the cone
-                    if (client.call(camSrv)) {
+                    if (camera_client.call(camSrv)) {
                         int coneX = camSrv.response.cone_x;
 
                         // Find out how far the cone is from centre
@@ -179,7 +193,19 @@ int main(int argc, char **argv) {
 
                         //Check if the cone is close enough to the centre or not
                         if (abs(centre_offset) < CENTRE_TOLERANCE) {
-                            // Put in dummy code to find the lidar
+                            lidar_calcs::front_object_distance srv;
+                            srv.request.dummy_var = true;
+
+                            if (distance_client.call(srv)) {
+                                coneDistance = srv.response.object_distance;
+                                coneAngle = currentOrientation;
+                                coneFound = true;
+                                state = 0; 
+                            }
+                            else {
+                                ROS_ERROR("Failed to call service get_front_object_distance");
+                                return 1;
+                            }
                         }
 
                         // If not, figure out how long we should rotate for
@@ -230,7 +256,7 @@ int main(int argc, char **argv) {
                     camSrv.request.dummy_var = true;
                     
                     // Call the service to obtain the position of the cone
-                    if (client.call(camSrv)) {
+                    if (camera_client.call(camSrv)) {
                         int bucketX = camSrv.response.bucket_x;
 
                         // Find out how far the cone is from centre
