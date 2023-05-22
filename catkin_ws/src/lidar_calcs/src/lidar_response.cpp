@@ -2,8 +2,12 @@
 #include "sensor_msgs/LaserScan.h"
 #include "std_msgs/Int16.h"
 #include <math.h>
+#include "lidar_calcs/front_object_distance.h"
 
 ros::Publisher lidar_pub;
+
+float lidar_mid_values[50];
+float lidar_front_size = 0;
 
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
 {
@@ -67,12 +71,13 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     //Check the middle third
     for(int i = left_end; i < right_start; i++)
     {
+        lidar_mid_values[i - left_end] = msg->ranges[i];
         if(msg->ranges[i] < thres_long && msg->ranges[i] > 0.05)
         {
             lidar_response.data = 2;
-            break;
         }
     }
+    lidar_front_size = right_start - left_end;
 
     
     // Nowcheck yomama
@@ -81,15 +86,47 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     lidar_pub.publish(lidar_response);
 }
 
+bool front_object_service_call(lidar_calcs::front_object_distance::Request &req, lidar_calcs::front_object_distance::Response &res) {
+    // Loop through the mid values and check it ........... pray we dont get a lidar callback in the meantime 0_0
+    // nah jk callbacks cant happen while we are in here
+    
+
+    // Basic logic is that if we find 3 consecutive points with relatively similar values, that will be our object in front of us
+    // Threshold is +- 200mm
+    for (int i = 0; i < lidar_front_size - 2; i++) {
+        float current = lidar_mid_values[i];
+        
+        // Discard any erroneous values
+        if (current > 0.05 && current < 35) {
+
+            // Check this value and next
+            if (abs(current - lidar_mid_values[i+1]) < 0.2) {
+                
+                // Check this value and the 2nd next one
+                if (abs(current - lidar_mid_values[i+2]) < 0.2) {
+                    res.object_distance = current;
+                    return true;
+                }
+            }
+        }
+    }
+
+    res.object_distance = 0;
+    return true;
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "lidar_response_node");
 
     ros::NodeHandle nh;
 
-
+    // Setup subscription to lidar
     ros::Subscriber lidar_get = nh.subscribe("sick_tim_7xx/scan", 10, lidarCallback);
     lidar_pub = nh.advertise<std_msgs::Int16>("lidar_response", 10);
+
+    // Setup service provider
+    ros::ServiceServer object_distance_service = nh.advertiseService("lidar_response_node/get_front_object_distance", front_object_service_call);
 
     ros::spin();
 
