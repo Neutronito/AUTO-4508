@@ -15,12 +15,12 @@ import numpy as np
 import blobconverter
 import json
 
-DEFAULT_PATH = str((Path(__file__).parent / Path('../models/best_openvino_2022.1_6shave.blob')).resolve().absolute())
-CONFIG_PATH = str((Path(__file__).parent / Path('../config/best.json')).resolve().absolute())
+DEFAULT_PATH = str((Path(__file__).parent / Path('../models/trollma.blob')).resolve().absolute())
+CONFIG_PATH = str((Path(__file__).parent / Path('../config/trollma.json')).resolve().absolute())
 
 # X_CENTRE_MAX = 100
 # X_CENTRE_MIN = -100
-CONE_CONFIDENCE_THRESHOLD   = 65
+CONE_CONFIDENCE_THRESHOLD   = 80
 BUCKET_CONFIDENCE_THRESHOLD = 80
 
 # parser = argparse.ArgumentParser()
@@ -92,7 +92,8 @@ nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
 camRgb.setPreviewSize(640, 416)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setFps(5)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P) # cant go lower
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
@@ -141,18 +142,28 @@ spatialDetectionNetwork.outNetwork.link(nnNetworkOut.input)
 ## CODE TEST
 
 device = dai.Device(pipeline, usb2Mode=True)
-previewQueue = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
-detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=4, blocking=False)
-depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=4, blocking=False)
+previewQueue = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
+detectionNNQueue = device.getOutputQueue(name="detections", maxSize=1, blocking=False)
+xoutBoundingBoxDepthMappingQueue = device.getOutputQueue(name="boundingBoxDepthMapping", maxSize=1, blocking=False)
+depthQueue = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
+networkQueue = device.getOutputQueue(name="nnNetwork", maxSize=1, blocking=False)
 
 def detect_objects(*args):
     if detectionNNQueue.isClosed():
         rospy.logerr("QUEUE CLOSED FOR SOME REASON!!!!!!!!!")
     # inDet = detectionNNQueue.tryGet()
 
-    inDet = detectionNNQueue.get()
+    inPreview = previewQueue.tryGet()
+    inDet = detectionNNQueue.tryGet()
+
+    if inDet == None:
+        return
+    mytimestamp = inDet.getTimestamp()
+    mytime = dai.Clock.now()
+    latency = (mytime - mytimestamp).total_seconds() * 1000
+    rospy.logerr("LATENCY IS AS FOLLOWS 0.0")
+    rospy.logerr(latency)
+
     depth = depthQueue.get()
     inNN = networkQueue.get()
     
@@ -201,10 +212,12 @@ def detect_objects(*args):
 
 rospy.init_node("stereo_camera_node", anonymous=False)
 
-object_detection = rospy.Service("stereo_camera_testing/object_locations", object_locations, detect_objects)
+# object_detection = rospy.Service("stereo_camera_testing/object_locations", object_locations, detect_objects)
 rospy.loginfo("Stereo Camera has finished init sequence")
-rospy.spin()
+# rospy.spin()
 
+while(True):
+    detect_objects();
 
 ## ORIGINAL CODE
 

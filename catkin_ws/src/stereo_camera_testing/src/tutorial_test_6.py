@@ -14,8 +14,8 @@ import numpy as np
 import blobconverter
 import json
 
-DEFAULT_PATH = str((Path(__file__).parent / Path('../models/best_openvino_2022.1_6shave.blob')).resolve().absolute())
-CONFIG_PATH = str((Path(__file__).parent / Path('../config/best.json')).resolve().absolute())
+DEFAULT_PATH = str((Path(__file__).parent / Path('../models/sigma.blob')).resolve().absolute())
+CONFIG_PATH = str((Path(__file__).parent / Path('../config/sigma.json')).resolve().absolute())
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("-m", "--model", help="Provide model name or model path for inference",
@@ -65,7 +65,7 @@ pipeline = dai.Pipeline()
 nnPath = DEFAULT_PATH
 if not Path(nnPath).exists():
     print("No blob found at {}. Looking into DepthAI model zoo.".format(nnPath))
-    nnPath = str(blobconverter.from_zoo(DEFAULT_PATH, shaves = 6, zoo_type = "depthai", use_cache=True))
+    nnPath = str(blobconverter.from_zoo(DEFAULT_PATH, shaves = 13, zoo_type = "depthai", use_cache=True))
 
 # Define sources and outputs
 camRgb = pipeline.create(dai.node.ColorCamera)
@@ -87,8 +87,8 @@ xoutDepth.setStreamName("depth")
 nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
-camRgb.setPreviewSize(640, 416)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setPreviewSize(320, 320)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
@@ -118,6 +118,8 @@ spatialDetectionNetwork.setAnchors(anchors)
 spatialDetectionNetwork.setAnchorMasks(anchorMasks)
 spatialDetectionNetwork.setIouThreshold(iouThreshold)
 spatialDetectionNetwork.setNumInferenceThreads(2)
+# spatialDetectionNetwork.setNumInferenceThreads(1)
+# spatialDetectionNetwork.setNumNCEPerInferenceThread(2)
 
 # Linking
 monoLeft.out.link(stereo.left)
@@ -155,6 +157,9 @@ with dai.Device(pipeline, usb2Mode=True) as device:
 
     while True:
         inPreview = previewQueue.get()
+
+        mytime = dai.Clock.now()
+        
         inDet = detectionNNQueue.get()
         depth = depthQueue.get()
         inNN = networkQueue.get()
@@ -197,38 +202,38 @@ with dai.Device(pipeline, usb2Mode=True) as device:
 
                 cv2.rectangle(depthFrameColor, (xmin, ymin), (xmax, ymax), color, cv2.FONT_HERSHEY_SCRIPT_SIMPLEX)
 
-        found_cone = False
-        found_bucket = False
-        cone_info = [-1, -1, -1]
-        bucket_info = [-1, -1, -1]
+        # found_cone = False
+        # found_bucket = False
+        # cone_info = [-1, -1, -1]
+        # bucket_info = [-1, -1, -1]
 
-        detections = inDet.detections
-        if len(detections) != 0:
-            for detection in detections:
-                rospy.loginfo("TROLLOLOLOL")
-                coords = detection.spatialCoordinates
-                x, y, z = coords.x, coords.y, coords.z
-                if detection.label == 1:
-                    found_cone = True
-                    cone_info = [x, y, z]
-                elif detection.label == 0:
-                    found_bucket = True
-                    bucket_info = [x, y, z]
+        # detections = inDet.detections
+        # if len(detections) != 0:
+        #     for detection in detections:
+        #         rospy.loginfo("TROLLOLOLOL")
+        #         coords = detection.spatialCoordinates
+        #         x, y, z = coords.x, coords.y, coords.z
+        #         if detection.label == 1:
+        #             found_cone = True
+        #             cone_info = [x, y, z]
+        #         elif detection.label == 0:
+        #             found_bucket = True
+        #             bucket_info = [x, y, z]
 
-        msg = objects()
+        # msg = objects()
 
-        msg.found_bucket = found_bucket
-        msg.found_cone = found_cone
+        # msg.found_bucket = found_bucket
+        # msg.found_cone = found_cone
 
-        msg.cone_x = int(cone_info[0])
-        msg.cone_y = int(cone_info[1])
-        msg.cone_z = int(cone_info[2])
+        # msg.cone_x = int(cone_info[0])
+        # msg.cone_y = int(cone_info[1])
+        # msg.cone_z = int(cone_info[2])
 
-        msg.bucket_x = int(bucket_info[0])
-        msg.bucket_y= int(bucket_info[1])
-        msg.bucket_z = int(bucket_info[2])
+        # msg.bucket_x = int(bucket_info[0])
+        # msg.bucket_y= int(bucket_info[1])
+        # msg.bucket_z = int(bucket_info[2])
 
-        pub.publish(msg)
+        # pub.publish(msg)
         # rospy.Rate(0.5).sleep()
 
 
@@ -238,6 +243,9 @@ with dai.Device(pipeline, usb2Mode=True) as device:
         iter = 0
         points = []
         for detection in detections:
+            if detection.confidence < 0.5:
+                continue
+
             # Denormalize bounding box
             x1 = int(detection.xmin * width)
             x2 = int(detection.xmax * width)
@@ -262,7 +270,8 @@ with dai.Device(pipeline, usb2Mode=True) as device:
             points.append([(detection.spatialCoordinates.x / 1000), (detection.spatialCoordinates.z / 1000), (detection.spatialCoordinates.y / 1000)])
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, cv2.FONT_HERSHEY_SIMPLEX)
         
-        cv2.putText(frame, "NN fps: {:.2f}".format(fps), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
+        latency = (mytime - inPreview.getTimestamp()).total_seconds() * 1000
+        cv2.putText(frame, "NN fps: {:.2f}".format(latency), (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color)
         cv2.imshow("depth", depthFrameColor)
         cv2.imshow("rgb", frame)
 
