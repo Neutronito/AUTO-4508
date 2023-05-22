@@ -51,6 +51,7 @@ add_message_files(
   FILES
   finished_state.msg
   action_requests.msg
+  object_detection_finished.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -108,6 +109,7 @@ catkin_package(
 #  LIBRARIES waypoint_driver
 #  CATKIN_DEPENDS roscpp std_msgs
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 ###########
