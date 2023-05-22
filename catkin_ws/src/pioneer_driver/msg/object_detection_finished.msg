@@ -1,0 +1,2 @@
+float64 bucket_cone_distance
+bool finished_job_successfully
