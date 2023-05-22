@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 	ros::ServiceServer service = waypoint_handle.advertiseService("waypoint_driver/gps_points", drive_waypoint);
 
 	// start the status change srv
-	ros::ServiceServer satus_service = waypoint_handle.advertiseService("waypoint_driver/status_change", triggered_status_change);
+	ros::ServiceServer status_service = waypoint_handle.advertiseService("waypoint_driver/status_change", triggered_status_change);
 
 	// Subscribe to imu
 	ros::Subscriber imu_subscriber = waypoint_handle.subscribe("imu_heading", 10, imu_heading_callback);
