@@ -103,6 +103,8 @@ bool triggered_status_change(waypoint_driver::status_change::Request &req, waypo
 	}
 	res.currently_on_job = onAJob;
 
+	ROS_INFO("Waypoint driver paused state is %s", pausedDriving ? "true" : "false");
+
 	return true;
 }
 
