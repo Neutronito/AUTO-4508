@@ -26,6 +26,9 @@ class TheFatController:
 	# Defines if we have reached our target or not
 	reached_target = False
 
+	# Defines if the cone finder has finished or not
+	finished_cone = False
+
 	# Driving states read from joystick
 	states = {"is_driving_automatically": False,
 				"is_allowed_to_drive": False}
@@ -71,11 +74,15 @@ class TheFatController:
 	def waypoint_finished_callback(self, data):
 		self.reached_target = True
 
+	def cone_finished_callback(self, data):
+		self.finished_cone = True
+
 	# Subscribe to the joystick topic
 	def setup_subs_and_pubs(self):
 		rospy.Subscriber("joy", Joy, self.update_states)
 		self.cone_detection_publisher = rospy.Publisher('cone_driving_detection/action_requests', action_requests, queue_size=5)
 		rospy.Subscriber('waypoint_driver/finished_state', finished_state, self.waypoint_finished_callback)
+		rospy.Subscriber('cone_driving_detection/finished_state', object_detection_finished, self.cone_finished_callback)
 		return
 
 	# Update internal state based on joystick settings
@@ -95,10 +102,25 @@ class TheFatController:
 				rospy.loginfo("Robot has been toggled to AUTOMATIC driving mode")
 				self.enable_remote_driving(False)
 				self.waypoint_status_change_client(False, False)
+
+				# Unpause cone
+				msg = action_requests()
+				msg.start_cone_detection = False
+				msg.pause_cone_detection = False
+				msg.terminate_current_detection = False
+				self.cone_detection_publisher.publish(msg)
+
 			else:
 				rospy.loginfo("Robot has been toggled to MANUAL driving mode")
 				self.enable_remote_driving(True)
 				self.waypoint_status_change_client(True, False)
+
+				# Pause cone
+				msg = action_requests()
+				msg.start_cone_detection = False
+				msg.pause_cone_detection = True
+				msg.terminate_current_detection = False
+				self.cone_detection_publisher.publish(msg)
 
 
 		return
@@ -135,7 +157,7 @@ class TheFatController:
 				self.waypoint_status_change_client(True, False)
 
 			# Wait for the target to be reached, loop runs at a rate of 10Hz
-			rate = rospy.Rate(10) # 10hz
+			rate = rospy.Rate(10) # 10Hz
 
 			self.reached_target = False
 
@@ -148,9 +170,14 @@ class TheFatController:
 			msg.pause_cone_detection = False
 			msg.terminate_current_detection = False
 			self.cone_detection_publisher.publish(msg)
-			while (True):
+			rospy.loginfo("Requested cone finder to start finding cones")
+			
+			while (self.finished_cone is False):
 				rate.sleep()
 
+			# Now we can move onto the next waypoint
+			self.finished_cone = False
+			self.reached_target = False
 
 
 	# Client for feeding gps coords
