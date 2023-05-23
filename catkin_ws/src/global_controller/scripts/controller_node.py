@@ -1,6 +1,7 @@
 import rospy
 import sys
 import time
+import csv
 from enum import Enum
 from sensor_msgs.msg import Joy
 from global_controller.msg import controller_states
@@ -46,29 +47,21 @@ class TheFatController:
 	def read_file_args(self, waypoint_file):
 		# Attempt to open the file
 		rospy.loginfo("Attempting to open file \"" + waypoint_file + "\".")
-		try:
-			waypoint_file = open(waypoint_file, mode="r")
-		except IOError:
-			rospy.logerr("Error, unable to open file.")
-			sys.exit()
+		
+		with open(waypoint_file, 'r') as csvfile:
+			reader = csv.reader(csvfile)
 
-		# Get all the lines
-		lines = waypoint_file.readlines()
-
-		# Put all the coordinates into an integer array
-		for current_line in lines:
-			split_line = current_line.split(" ")
-			lat = float(split_line[0])
-			lng = float(split_line[1])
-			self.coordinates.append((lat, lng))
+			for row in reader:
+				if len(row) == 2:  # Ensure there are two columns in each row
+					latitude = float(row[0])
+					longitude = float(row[1])
+					self.coordinates.append((latitude, longitude))
 
 		# Now print the coordinates
 		rospy.loginfo("Read the following coordinates: ")
 		for coord_tuple in self.coordinates:
 			rospy.loginfo(coord_tuple)
 
-		# Close the file
-		waypoint_file.close()
 		return
 
 	def waypoint_finished_callback(self, data):
