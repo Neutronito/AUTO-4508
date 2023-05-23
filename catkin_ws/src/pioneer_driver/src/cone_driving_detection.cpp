@@ -6,6 +6,7 @@
 #include <geometry_msgs/Twist.h>
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Bool.h>
 #include "lidar_calcs/front_object_distance.h"
 
 // Driving stuff
@@ -15,11 +16,13 @@ float angularVelocity = 0;
 // Task state variables
 bool onAJob = false;
 bool currentlyPaused = false;
+bool deadman_pressed = false;
 
 // State 0 indicates rotating on the stop to find a cone or bucket
 // State 1 indicates positioning and obtaining the distance of the cone
 // State 2 indicates positioning and obtaining the distance of a bucket
 int state = 0;
+int pseudoDelay = 0;
 
 // Recording variables for cone
 int coneDistance = 0;
@@ -34,8 +37,6 @@ float bucketAngle = 0;
 // Note, this orientation is 0 to 360 clockwise with 0 North
 int currentOrientation = 0;
 
-// Formula for quaternion
-//https://robotics.stackexchange.com/questions/16471/get-yaw-from-quaternion
 
 // This is for task 0, indicates whether we should start rotating or take a photo and a timer
 bool onSpotRotating = false;
@@ -44,13 +45,14 @@ double rotatingStartTime;
 double timeToSpendRotating = 0;
 
 // Positioning stuff
-#define IMAGE_CENTRE_X 400
+#define IMAGE_CENTRE_X 416
 #define CENTRE_TOLERANCE 20
+// Distance threshold is in mm
+#define DISTANCE_THRESHOLD 1000
 
 
 // Received a command from an external node
 void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
-    ROS_INFO("Recieved a request to start cone detection");
     // Start a job
     if (msg->start_cone_detection) {
         onAJob = true;
@@ -59,6 +61,7 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
     }
     // Deal with pausing
     currentlyPaused = msg->pause_cone_detection;
+    ROS_INFO("Cone paused state is %s", currentlyPaused ? "true" : "false");
     // Deal with terminating a job
     if (msg->terminate_current_detection) { 
         onAJob = false;
@@ -73,6 +76,11 @@ void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
         // Map to 0 - 360
         currentOrientation = (currentOrientation + 360) % 360;
 	}
+}
+
+// Check if the deadman is pressed
+void deadman_callback(const std_msgs::Bool::ConstPtr& msg) {
+	deadman_pressed = msg->data;
 }
 
 int main(int argc, char **argv) {
@@ -97,6 +105,9 @@ int main(int argc, char **argv) {
     // Setup client for distance finding
     ros::ServiceClient distance_client = cone_handle.serviceClient<lidar_calcs::front_object_distance>("lidar_response_node/get_front_object_distance");
     
+    // Setup subscription to deadman topic
+	ros::Subscriber deadman_subscriber = cone_handle.subscribe("drive_values/deadman_state", 10, deadman_callback);
+    
     // Run at 10Hz
     ros::Rate loopRate(10);
     
@@ -105,15 +116,29 @@ int main(int argc, char **argv) {
     while (ros::ok()){
         
         // Check if I'm on a job and not paused
-        if (onAJob && !currentlyPaused) {
+        if (onAJob && !currentlyPaused && deadman_pressed) {
 
             // Rotating finding cone or bucket state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (state == 0) {
 
                 // Check if we have finished
                 if (coneFound && bucketFound) {
-                    // Publish information finish information
+                    // Find the distance between the objects
+                    // Note angles are 0 to 360 (yay easier maths)
+                    float angleBetweenObjects = abs(coneAngle - bucketAngle);
 
+                    // use cosine law
+                    float distance = sqrt((coneDistance * coneDistance) + (bucketDistance * bucketDistance) - 2 * coneDistance * bucketDistance * cos(angleBetweenObjects));
+
+                    // Now publish the information
+                    pioneer_driver::object_detection_finished msg;
+                    msg.finished_job_successfully = true;
+                    msg.bucket_cone_distance = distance;
+
+                    finished_publisher.publish(msg);
+
+                    ROS_INFO("The cone node has terminated, identifying a cone and a bucket with a distance apart of %fmm", distance);
+                    onAJob = false;
                 }
 
                 
@@ -129,11 +154,20 @@ int main(int argc, char **argv) {
 
                         // Check if we have found a cone
                             if (camSrv.response.found_cone) {
-                                ROS_INFO("A cone has been found, moving to state one");
-                                state = 1;
-                            } else if (camSrv.response.found_bucket) {
-                                ROS_INFO("A bucket has been found, moving to state two");
-                                state = 2;
+                                // check if we have found the cone already or not
+                                if (!coneFound) {
+                                    ROS_INFO("A cone has been found, moving to state one");
+                                    state = 1;
+                                }
+                            } 
+                            
+                            // Check if we have foudn the bucket
+                            else if (camSrv.response.found_bucket) {
+                                // Only move to bucket state if the cone has been found
+                                if (coneFound) {
+                                    ROS_INFO("A bucket has been found, moving to state two");
+                                    state = 2;
+                                }
                             } else {
                                 ROS_INFO("No object found, continuing rotation");
                             }
@@ -148,7 +182,7 @@ int main(int argc, char **argv) {
                     onSpotRotating = true;
                     linearVelocity = 0;
                     angularVelocity = 1;
-
+                    ROS_INFO("Now rotating in search of an object");
                     
                     struct timespec currentTime;
                     clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
@@ -190,21 +224,24 @@ int main(int argc, char **argv) {
 
                         // Find out how far the cone is from centre
                         int centre_offset = IMAGE_CENTRE_X - coneX;
+                        linearVelocity = 0;
 
                         //Check if the cone is close enough to the centre or not
                         if (abs(centre_offset) < CENTRE_TOLERANCE) {
-                            lidar_calcs::front_object_distance srv;
-                            srv.request.dummy_var = true;
-
-                            if (distance_client.call(srv)) {
-                                coneDistance = srv.response.object_distance;
-                                coneAngle = currentOrientation;
-                                coneFound = true;
-                                state = 0; 
+                            // Now check if the cone is close enough or not
+                            if (camSrv.response.cone_z >  DISTANCE_THRESHOLD) {
+                                linearVelocity = 1;
+                                pseudoDelay = 0;
+                            } else if (pseudoDelay < 3) {
+                                pseudoDelay++;
                             }
+                            // Now take a photo of the cone and leave this state
                             else {
-                                ROS_ERROR("Failed to call service get_front_object_distance");
-                                return 1;
+                                // Take photo of cone
+                                coneDistance = camSrv.response.cone_z;
+                                coneFound = true;
+                                coneAngle = currentOrientation;
+                                state = 0;
                             }
                         }
 
@@ -233,6 +270,8 @@ int main(int argc, char **argv) {
                     struct timespec currentTime;
                     clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
                     double elapsedTimeMillis = (currentTime.tv_sec * 1000 - rotatingStartTime);
+
+                    ROS_INFO("Rotating to centre cone");
                     
                     // Stop rotating
                     if (elapsedTimeMillis > timeToSpendRotating) {
@@ -264,7 +303,10 @@ int main(int argc, char **argv) {
 
                         //Check if the cone is close enough to the centre or not
                         if (abs(centre_offset) < CENTRE_TOLERANCE) {
-                            // Put in dummy code to find the lidar
+                            bucketDistance = camSrv.response.bucket_z;
+                            bucketAngle = currentOrientation;
+                            bucketFound = true;
+                            state = 0;
                         }
 
                         // If not, figure out how long we should rotate for
@@ -292,6 +334,8 @@ int main(int argc, char **argv) {
                     struct timespec currentTime;
                     clock_gettime(CLOCK_MONOTONIC_RAW, &currentTime);
                     double elapsedTimeMillis = (currentTime.tv_sec * 1000 - rotatingStartTime);
+
+                    ROS_INFO("Rotating to centre bucket");
                     
                     // Stop rotating
                     if (elapsedTimeMillis > timeToSpendRotating) {
