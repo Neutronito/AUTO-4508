@@ -24,7 +24,7 @@
 
     <node name="nmea_serial_driver" pkg="nmea_navsat_driver" type="nmea_serial_driver" args="_baud:=9600 _port:=/dev/ttyACM0"/>
 
-    <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/waypoints.txt" output="screen"/>
+    <node name="controller_node" pkg="global_controller" type="controller_node.py" args="/home/group2/catkin_dependencies/coordinates.csv" output="screen"/>
 
     <node name="tkinter_node" pkg="user_interface" type="tkinterGui.py"/> 
     
