@@ -1,4 +1,8 @@
 <launch>
     <!-- Nodes -->
-    <node name="stereo_test_node" pkg="stereo_camera_testing" type="tutorial_test_1.py" output="screen"/>
+    <node name="joy_node" pkg="joy" type="joy_node">
+        <param name="autorepeat_rate" value="10" type="double"/>
+    </node>
+
+    <node name="stereo_test_node" pkg="stereo_camera_testing" type="stereo_camera.py" output="screen"/>
 </launch>

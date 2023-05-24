@@ -39,7 +39,7 @@ import json
 #     "bear",           "zebra",      "giraffe",       "backpack",      "umbrella",    "handbag",       "tie",
 #     "suitcase",       "frisbee",    "skis",          "snowboard",     "sports ball", "kite",          "baseball bat",
 #     "baseball glove", "skateboard", "surfboard",     "tennis racket", "bottle",      "wine glass",    "cup",
-#     "fork",           "knife",      "spoon",         "bowl",          "banana",      "apple",         "sandwich",
+#     "fork",           "knife",      "spoon",         "bowl",          "bnana",      "apple",         "sandwich",
 #     "orange",         "broccoli",   "carrot",        "hot dog",       "pizza",       "donut",         "cake",
 #     "chair",          "sofa",       "pottedplant",   "bed",           "diningtable", "toilet",        "tvmonitor",
 #     "laptop",         "mouse",      "remote",        "keyboard",      "cell phone",  "microwave",     "oven",
@@ -47,8 +47,8 @@ import json
 #     "teddy bear",     "hair drier", "toothbrush"
 # ]
 
-DEFAULT_PATH = str((Path(__file__).parent / Path('../models/sigma.blob')).resolve().absolute())
-CONFIG_PATH = str((Path(__file__).parent / Path('../config/sigma.json')).resolve().absolute())
+DEFAULT_PATH = str((Path(__file__).parent / Path('../models/mooga.blob')).resolve().absolute())
+CONFIG_PATH = str((Path(__file__).parent / Path('../config/mooga.json')).resolve().absolute())
 
 # X_CENTRE_MAX = 100
 # X_CENTRE_MIN = -100
@@ -95,7 +95,7 @@ xoutRgb.setStreamName("rgb")
 nnOut.setStreamName("nn")
 
 # Properties
-camRgb.setPreviewSize(320, 320)
+camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
@@ -149,8 +149,9 @@ with dai.Device(pipeline, usb2Mode=True) as device:
             cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
         # Show the frame
         cv2.imshow(name, frame)
-
+    num = 0
     while True:
+        num += 1
         if syncNN:
             inRgb = qRgb.get()
             inDet = qDet.get()
@@ -160,6 +161,7 @@ with dai.Device(pipeline, usb2Mode=True) as device:
 
         if inRgb is not None:
             frame = inRgb.getCvFrame()
+            
             cv2.putText(frame, "NN fps: {:.2f}".format(counter / (time.monotonic() - startTime)),
                         (2, frame.shape[0] - 4), cv2.FONT_HERSHEY_TRIPLEX, 0.4, color2)
 
@@ -168,6 +170,7 @@ with dai.Device(pipeline, usb2Mode=True) as device:
             counter += 1
 
         if frame is not None:
+            cv2.imwrite("./images/bogmoggers" + str(num) + ".jpg", frame)
             displayFrame("rgb", frame)
 
         if cv2.waitKey(1) == ord('q'):
