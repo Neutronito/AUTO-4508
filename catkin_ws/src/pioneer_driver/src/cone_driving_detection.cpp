@@ -61,6 +61,8 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
         onAJob = true;
         state = 0;
         rotatedAmount = 0;
+        coneFound = false;
+        bucketFound = false;
         ROS_INFO("Starting a cone job");
     }
     // Deal with pausing
@@ -82,7 +84,14 @@ void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
         currentOrientation = (currentOrientation + 360) % 360;
 
         // Keep track of how far we have rotated
-        rotatedAmount += abs(currentOrientation - prevOrientation);
+        float cw = abs(prevOrientation - currentOrientation);
+        float ccw = 360 - cw;
+
+        if (ccw < cw) {
+            rotatedAmount += ccw;
+        } else {
+            rotatedAmount += cw;
+        }
 	}
 }
 
@@ -132,6 +141,16 @@ int main(int argc, char **argv) {
             // Rotating finding cone or bucket state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (state == 0) {
 
+                // Check if we have not found anything
+                if (rotatedAmount > 720) {
+                    ROS_INFO("The cone node has rotated 720 degrees without finding anything, continuing to next waypoint");
+                    onAJob = false;
+                    pioneer_driver::object_detection_finished msg;
+                    msg.finished_job_successfully = true;
+                    msg.bucket_cone_distance = 0;
+                    finished_publisher.publish(msg);
+                }
+
                 // Send a service request
                 ROS_INFO("Cone driver is requesting an image from the stereo node");
                 stereo_camera_testing::object_locations camSrv;
@@ -148,8 +167,11 @@ int main(int argc, char **argv) {
                                 ROS_INFO("A cone has been found, moving to state one");
                                 state = 1;
                             } else if (coneFound && bucketFound) {
-                                state = 1;
-                                ROS_INFO("I've already found the cone and bucket, moving back into state 1 to refind the cone.");
+                                state = 3;
+                                desiredOrientation = currentOrientation - 90;
+                                desiredOrientation = (desiredOrientation + 360) % 360;
+                                angularVelocity = 0.5;
+                                ROS_INFO("Re-found the cone, now rotate 90* to the left.");
                             }
                         } 
                         
@@ -173,16 +195,6 @@ int main(int argc, char **argv) {
             
             // We are trying to find the position of the cone~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             else if (state == 1) {
-
-                    // Check if we have not found anything
-                    if (rotatedAmount > 720) {
-                        ROS_INFO("The cone node has rotated 720 degrees without finding anything, continuing to next waypoint");
-                        onAJob = false;
-                        pioneer_driver::object_detection_finished msg;
-                        msg.finished_job_successfully = true;
-                        msg.bucket_cone_distance = 0;
-                        finished_publisher.publish(msg);
-                    }
 
                     stereo_camera_testing::object_locations camSrv;
                     camSrv.request.dummy_var = true;
@@ -217,31 +229,21 @@ int main(int argc, char **argv) {
                                     angularVelocity = 0;
                                     // Now check if the cone is close enough or not
                                     if (coneDistance <  DISTANCE_THRESHOLD) {
+                                        // Update info internally
+                                        linearVelocity = 0;
+                                        coneDistance = coneDistance;
+                                        coneAngle = currentOrientation;
+                                        coneFound = true;
+                                        ROS_INFO("Found the cone and taken its photo, recording distance and moving on to bucket");
+                                        ROS_INFO("The cone distance was found to be %f", coneDistance);
 
-                                        // Check if we have already found the cone, if yes it means we are only using this for centering, and move to state 3
-                                        if (coneFound) {
-                                            state = 3;
-                                            desiredOrientation = currentOrientation - 90;
-                                            desiredOrientation = (desiredOrientation + 360) % 360;
-                                            angularVelocity = 0.5;
-                                            ROS_INFO("Re-found the cone, now rotate 90* to the left.");
-                                        } else {
-                                            // Update info internally
-                                            linearVelocity = 0;
-                                            coneDistance = coneDistance;
-                                            coneAngle = currentOrientation;
-                                            coneFound = true;
-                                            ROS_INFO("Found the cone and taken its photo, recording distance and moving on to bucket");
-                                            ROS_INFO("The cone distance was found to be %f", coneDistance);
+                                        // Request image to be taken
+                                        std_msgs::Bool msg;
+                                        msg.data = true;
+                                        photo_taker.publish(msg);
 
-                                            // Request image to be taken
-                                            std_msgs::Bool msg;
-                                            msg.data = true;
-                                            photo_taker.publish(msg);
-
-                                            state = 0;
-                                            rotatedAmount = 0;
-                                        }
+                                        state = 0;
+                                        rotatedAmount = 0;
                                     }
                                 }
 
