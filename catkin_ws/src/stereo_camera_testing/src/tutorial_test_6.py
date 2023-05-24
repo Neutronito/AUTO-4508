@@ -14,8 +14,8 @@ import numpy as np
 import blobconverter
 import json
 
-DEFAULT_PATH = str((Path(__file__).parent / Path('../models/sigma.blob')).resolve().absolute())
-CONFIG_PATH = str((Path(__file__).parent / Path('../config/sigma.json')).resolve().absolute())
+DEFAULT_PATH = str((Path(__file__).parent / Path('../models/garbo.blob')).resolve().absolute())
+CONFIG_PATH = str((Path(__file__).parent / Path('../config/garbo.json')).resolve().absolute())
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument("-m", "--model", help="Provide model name or model path for inference",
@@ -87,7 +87,7 @@ xoutDepth.setStreamName("depth")
 nnNetworkOut.setStreamName("nnNetwork")
 
 # Properties
-camRgb.setPreviewSize(320, 320)
+camRgb.setPreviewSize(416, 416)
 camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_720_P)
 camRgb.setInterleaved(False)
 camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
@@ -257,7 +257,7 @@ with dai.Device(pipeline, usb2Mode=True) as device:
             iter+=1
             cv2.putText(frame, str(label), (x1 + 10, y1 + 20), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, "{:.2f}".format(detection.confidence*100), (x1 + 10, y1 + 35), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
-            cv2.putText(frame, f"X: {int(detection.spatialCoordinates.x)} mm", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
+            cv2.putText(frame, f"X: {int((x1+x2)/2 - width/2)} mm", (x1 + 10, y1 + 50), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"Y: {int(detection.spatialCoordinates.y)} mm", (x1 + 10, y1 + 65), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
             cv2.putText(frame, f"Z: {int(detection.spatialCoordinates.z)} mm", (x1 + 10, y1 + 80), cv2.FONT_HERSHEY_TRIPLEX, 0.5, 255)
 
