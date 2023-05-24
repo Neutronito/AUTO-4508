@@ -29,6 +29,7 @@ class TheFatController:
 
 	# Defines if the cone finder has finished or not
 	finished_cone = False
+	bucket_cone_distances = []
 
 	# Driving states read from joystick
 	states = {"is_driving_automatically": False,
@@ -71,9 +72,10 @@ class TheFatController:
 
 	def cone_finished_callback(self, data):
 		self.finished_cone = True
+		self.bucket_cone_distances.append(data.bucket_cone_distance)
 
 	# Subscribe to the joystick topic
-	def setup_subs_and_pubs(self):
+	def setup_subs_and_pubs(self):	
 		rospy.Subscriber("joy", Joy, self.update_states)
 		self.cone_detection_publisher = rospy.Publisher('cone_driving_detection/action_requests', action_requests, queue_size=5)
 		rospy.Subscriber('waypoint_driver/finished_state', finished_state, self.waypoint_finished_callback)
