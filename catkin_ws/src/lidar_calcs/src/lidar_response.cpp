@@ -93,25 +93,17 @@ bool front_object_service_call(lidar_calcs::front_object_distance::Request &req,
 
     // Basic logic is that if we find 3 consecutive points with relatively similar values, that will be our object in front of us
     // Threshold is +- 200mm
-    for (int i = 0; i < lidar_front_size - 2; i++) {
+    float smallest = 150.0;
+    for (int i = 0; i < lidar_front_size - 1; i++) {
         float current = lidar_mid_values[i];
         
         // Discard any erroneous values
         if (current > 0.05 && current < 35) {
-
-            // Check this value and next
-            if (abs(current - lidar_mid_values[i+1]) < 0.2) {
-                
-                // Check this value and the 2nd next one
-                if (abs(current - lidar_mid_values[i+2]) < 0.2) {
-                    res.object_distance = current;
-                    return true;
-                }
-            }
+            if (current < smallest) smallest = current;
         }
     }
 
-    res.object_distance = 0;
+    res.object_distance = smallest;
     return true;
 }
 
