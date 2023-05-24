@@ -50,12 +50,14 @@ class TheFatController:
 		
 		with open(waypoint_file, 'r') as csvfile:
 			reader = csv.reader(csvfile)
-
 			for row in reader:
 				if len(row) == 2:  # Ensure there are two columns in each row
 					latitude = float(row[0])
 					longitude = float(row[1])
-					self.coordinates.append((latitude, longitude))
+					self.coordinates.append((latitude, longitude))		
+
+		# OPTIONAL - LEAVE IN ONLY FoR BONUS MARKS
+		self.coordinates.append(self.coordinates[0])
 
 		# Now print the coordinates
 		rospy.loginfo("Read the following coordinates: ")
