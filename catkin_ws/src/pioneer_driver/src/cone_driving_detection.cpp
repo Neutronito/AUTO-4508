@@ -36,7 +36,9 @@ float bucketAngle = 0;
 
 // Note, this orientation is 0 to 360 clockwise with 0 North
 int currentOrientation = 0;
+int prevOrientation = 0;
 int desiredOrientation = 0;
+int rotatedAmount = 0;
 
 
 // This is for task 0, indicates whether we should start rotating or take a photo and a timer
@@ -58,6 +60,7 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
     if (msg->start_cone_detection) {
         onAJob = true;
         state = 0;
+        rotatedAmount = 0;
         ROS_INFO("Starting a cone job");
     }
     // Deal with pausing
@@ -73,9 +76,13 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
 // Gets the imu heading
 void imu_heading_callback(const std_msgs::Float64::ConstPtr& msg) {
     if (onAJob) {
-		currentOrientation = (int)msg->data;
+		prevOrientation = currentOrientation;
+        currentOrientation = (int)msg->data;
         // Map to 0 - 360
         currentOrientation = (currentOrientation + 360) % 360;
+
+        // Keep track of how far we have rotated
+        rotatedAmount += abs(currentOrientation - prevOrientation);
 	}
 }
 
@@ -167,6 +174,16 @@ int main(int argc, char **argv) {
             // We are trying to find the position of the cone~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             else if (state == 1) {
 
+                    // Check if we have not found anything
+                    if (rotatedAmount > 720) {
+                        ROS_INFO("The cone node has rotated 720 degrees without finding anything, continuing to next waypoint");
+                        onAJob = false;
+                        pioneer_driver::object_detection_finished msg;
+                        msg.finished_job_successfully = true;
+                        msg.bucket_cone_distance = 0;
+                        finished_publisher.publish(msg);
+                    }
+
                     stereo_camera_testing::object_locations camSrv;
                     camSrv.request.dummy_var = true;
                     
@@ -177,6 +194,7 @@ int main(int argc, char **argv) {
                         if (!camSrv.response.found_cone) {
                             ROS_INFO("Somehow in state 1 but no cone, back to state 0");
                             state = 0;
+                            rotatedAmount = 0;
                         }
                         else {
 
@@ -222,6 +240,7 @@ int main(int argc, char **argv) {
                                             photo_taker.publish(msg);
 
                                             state = 0;
+                                            rotatedAmount = 0;
                                         }
                                     }
                                 }
@@ -252,6 +271,7 @@ int main(int argc, char **argv) {
 
                     if (!camSrv.response.found_bucket) {
                         state = 0;
+                        rotatedAmount = 0;
                         ROS_INFO("Somehow in state 2 but no bucket, moving back to state 0");
                     } else {
 
@@ -264,6 +284,7 @@ int main(int argc, char **argv) {
                                 bucketFound = true;
                                 ROS_INFO("Found the bucket and taken its photo, recording distance and returning to state 0");
                                 state = 0;
+                                rotatedAmount;
 
                                 // Request image to be taken
                                 std_msgs::Bool msg;
@@ -292,10 +313,12 @@ int main(int argc, char **argv) {
                     angularVelocity = 0;
 
                     // Find the distance between the objects
-                    // Note angles are 0 to 360 (yay easier maths)
+                    // Note angles are 0 to 360 (yay easier maths), but just need to convert to rad
                     float angleBetweenObjects = abs(coneAngle - bucketAngle);
+                    angleBetweenObjects = angleBetweenObjects / 180 * M_PI;
                     ROS_INFO("The cone angle is %f, the bucket angle is %f and the total angle is %f.", coneAngle, bucketAngle, angleBetweenObjects);
-
+                    
+                    
                     // use cosine law
                     float distance = sqrt((coneDistance * coneDistance) + (bucketDistance * bucketDistance) - 2 * coneDistance * bucketDistance * cos(angleBetweenObjects));
 
