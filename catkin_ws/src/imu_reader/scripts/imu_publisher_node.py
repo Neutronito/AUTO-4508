@@ -21,7 +21,7 @@ def onAlgorithmData(self, quaternion, timestamp):
 def main():
 	global imu_publisher_handle
 	global spatial_channel
-
+	
 	# Now start the publisher
 	imu_publisher_handle = rospy.Publisher('imu_heading', Float64, queue_size=10)
 	rospy.init_node('imu_publisher', anonymous=True)
