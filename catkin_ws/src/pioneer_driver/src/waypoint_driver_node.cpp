@@ -12,7 +12,7 @@
 
 #define GOALTOLERANCE 0.00001
 
-#define MAXROTVEL 2
+#define MAXROTVEL 0.5
 #define ROTSCALEFACTOR 0.0222	
 
 bool onAJob = false;
@@ -153,13 +153,13 @@ int main(int argc, char **argv) {
 				// Veer right, obstacle on the left 
 				if (lidar_response == -1) {
 					angularVelocity = -0.5;
-					linearVelocity = 1;
+					linearVelocity = 0.7;
 				} 
 				
 				// Veer left, obstacle on right
 				else if (lidar_response == 1) {
 					angularVelocity = 0.5;
-					linearVelocity = 1;
+					linearVelocity = 0.7;
 				}
 
 				// Obstacle in front, I've chosen to turn right away instead of left (no specific reason)
@@ -167,6 +167,7 @@ int main(int argc, char **argv) {
 					linearVelocity = 0;
 					angularVelocity = 1;
 				} 
+				ROS_INFO("Lidar has seized controlled, returned a state of %d", lidar_response);
 			}
 
 			else {
@@ -229,8 +230,9 @@ int main(int argc, char **argv) {
 					// If we are turning fast, we should reduce our linear velocity to not overtorque the battery
 					linearVelocity = 2 - abs(angularVelocity);
 					
-					// Don't allow the linear velocity to be greater than 1
-					if (linearVelocity > 1) linearVelocity == 1;
+					// Don't allow the linear velocity to be greater than 2 or less than 1
+					if (linearVelocity > 2) linearVelocity = 2;
+					if (linearVelocity < 1) linearVelocity = 1;
 				}
 			}
 
