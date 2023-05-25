@@ -10,7 +10,7 @@
 #include <geometry_msgs/Twist.h>
 #include "waypoint_driver/finished_state.h"
 
-#define GOALTOLERANCE 0.00001
+#define GOALTOLERANCE 0.00002
 
 #define MAXROTVEL 0.5
 #define ROTSCALEFACTOR 0.0222	
@@ -152,14 +152,14 @@ int main(int argc, char **argv) {
 
 				// Veer right, obstacle on the left 
 				if (lidar_response == -1) {
-					angularVelocity = -0.5;
-					linearVelocity = 0.7;
+					angularVelocity = -1;
+					linearVelocity = 0.4;
 				} 
 				
 				// Veer left, obstacle on right
 				else if (lidar_response == 1) {
-					angularVelocity = 0.5;
-					linearVelocity = 0.7;
+					angularVelocity = 1;
+					linearVelocity = 0.4;
 				}
 
 				// Obstacle in front, I've chosen to turn right away instead of left (no specific reason)
@@ -219,7 +219,7 @@ int main(int argc, char **argv) {
 
 					// Now set the angular velocity based on our angle
 					angularVelocity = (float)angleToDrive * ROTSCALEFACTOR;
-
+	
 					if (angularVelocity < (0 - MAXROTVEL)) {
 						angularVelocity = 0 - MAXROTVEL;
 					} else if (angularVelocity > MAXROTVEL) {
