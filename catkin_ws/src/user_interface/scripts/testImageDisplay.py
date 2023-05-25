@@ -102,11 +102,12 @@ class PicsDisplay:
         # show_distances will erase previous distance and replace it with new distance 
 
         global image_count, distance_count
+        index = int(image_count/2) + 1
 
         print("DISTANCES SIZE")
         print(image_count)
         self.text.delete('1.0', END)
-        self.text.insert(END, distances_array[image_count+1])
+        self.text.insert(END, distances_array[index])
 
     def sizing_photo(self):
         resolution = [600, 600]
@@ -153,7 +154,7 @@ class PicsDisplay:
  
  
     def folderselect(self):
-        self.folderpath = "/home/group2/Pictures/" # "../group2/catkin_dependencies/photos"
+        self.folderpath = "/home/group2/catkin_dependencies/photos"
         if self.folderpath != "":
             self.photolist = []
             self.photoindex = 0
