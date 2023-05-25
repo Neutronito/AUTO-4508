@@ -292,6 +292,10 @@ def take_image_with_joystick(joy):
     return
 
 def take_image(data):
+
+    # Create service response
+    service_response = {}
+
     # if (joy.buttons[2] == 1):
     #     rospy.loginfo("Button Pressed")
     inPreview = qRgb.tryGet()
@@ -326,9 +330,14 @@ def take_image(data):
         #     f.write(image_data)
         rospy.loginfo("Image has been saved to:")
         rospy.loginfo(fName)
+        service_response["photo_status"] = True
     else:
         rospy.logerr("There was no image in the queue! This is indicative of an ERROR!")
+        service_response["photo_status"] = False
             # rospy.loginfo('Image saved to', str(fName))
+
+    
+    return service_response
 
 
 
@@ -336,8 +345,8 @@ def take_image(data):
 rospy.init_node("stereo_camera_node", anonymous=False)
 rospy.Subscriber("joy", Joy, take_image_with_joystick)
 object_detection = rospy.Service("stereo_camera_testing/object_locations", object_locations, detect_objects)
-# take_image = rospy.Service("stereo_camera_testing/take_image", object_locations, detect_objects)
-rospy.Subscriber("stereo_camera_node/image_request", Bool, take_image)
+take_image = rospy.Service("stereo_camera_testing/image_request", take_photo, take_image)
+# rospy.Subscriber("stereo_camera_node/image_request", Bool, take_image)
 rospy.loginfo("Stereo Camera has finished init sequence")
 rospy.spin()
 
