@@ -3,6 +3,7 @@ import sys
 import time
 import csv
 import os 
+import roslaunch
 from enum import Enum
 from sensor_msgs.msg import Joy
 from global_controller.msg import controller_states
@@ -61,7 +62,8 @@ class TheFatController:
 
 
 		# Insert home coordinates while removing the last coordinate since its the bonus
-		self.coordinates[len(self.coordinates) - 1] = self.coordinates[0]
+		self.coordinates.append(self.coordinates[0])
+		self.coordinates = self.coordinates[1:]
 
 		# Now print the coordinates
 		rospy.loginfo("Read the following coordinates: ")
@@ -148,10 +150,9 @@ class TheFatController:
 	# Feed way point commands to the way point driving node
 	def feed_waypoints(self):     
 		# # Loop through all the way points, feeding each one into the robot
-		for coordinate_tuple in self.coordinates:
-			
+		for i in range(0, len(self.coordinates)-1):
 			# Get the next coordinate
-			response = self.gps_points_client(coordinate_tuple[0], coordinate_tuple[1])
+			response = self.gps_points_client(self.coordinates[i][0], self.coordinates[i][1])
 
 			if response is False:
 				# Terminate the previous drive and send the new one again
@@ -183,6 +184,34 @@ class TheFatController:
 			# Now we can move onto the next waypoint
 			self.finished_cone = False
 			self.reached_target = False
+			
+        # Now do the last coordinates, only driving back
+		index = len(self.coordinates) - 1
+		response = self.gps_points_client(self.coordinates[index][0], self.coordinates[index][1])
+		if response is False:
+			# Terminate the previous drive and send the new one again
+			rospy.loginfo("False returned upon attempting to start a new waypoint drive")
+
+		# Set to pause if manual driving
+		if (not self.states["is_driving_automatically"]):
+			self.waypoint_status_change_client(True, False)
+
+		# Wait for the target to be reached, loop runs at a rate of 10Hz
+		rate = rospy.Rate(10) # 10Hz
+
+		self.reached_target = False
+
+		while (self.reached_target is False):
+			rate.sleep()
+
+		# Fully done, launch user interface
+		node = roslaunch.core.Node("user_interface", "testImageDisplay.py")
+		launch = roslaunch.scriptapi.ROSLaunch()
+		launch.start()
+		launch.launch(node)
+
+
+
 
 
 	# Client for feeding gps coords
