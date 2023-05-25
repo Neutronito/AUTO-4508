@@ -2,12 +2,14 @@ import rospy
 import sys
 import time
 import csv
+import os 
 from enum import Enum
 from sensor_msgs.msg import Joy
 from global_controller.msg import controller_states
 from pioneer_driver.srv import *
 from drive_values.srv import *
 from pioneer_driver.msg import *
+
 
 STATE_PUBLISH_RATE = 60
 TOGGLE_MINIMUM_INTERVAL = 1 # 1 second
@@ -57,8 +59,9 @@ class TheFatController:
 					longitude = float(row[1])
 					self.coordinates.append((latitude, longitude))		
 
-		# OPTIONAL - LEAVE IN ONLY FoR BONUS MARKS
-		self.coordinates.append(self.coordinates[0])
+
+		# Insert home coordinates while removing the last coordinate since its the bonus
+		self.coordinates[len(self.coordinates) - 1] = self.coordinates[0]
 
 		# Now print the coordinates
 		rospy.loginfo("Read the following coordinates: ")
@@ -73,6 +76,11 @@ class TheFatController:
 	def cone_finished_callback(self, data):
 		self.finished_cone = True
 		self.bucket_cone_distances.append(data.bucket_cone_distance)
+		file = open("../catkin_dependencies/distances.txt", "a")
+		content = "\n" + str(data.bucket_cone_distance)
+		file.write(content)
+		file.close()
+
 
 	# Subscribe to the joystick topic
 	def setup_subs_and_pubs(self):	
@@ -226,6 +234,13 @@ if __name__ == '__main__':
 
 	# Create a Controller object, use error checking
 	rospy.init_node('TheFatController', anonymous=False)
+
+	# create a text file for writing. Delete old one first, then make it again. 
+	os.remove('../catkin_dependencies/distances.txt')
+	with open(r'../catkin_dependencies/distances.txt', 'w') as fp:
+		fp.write('bucket distances')
+		pass
+	
 
 	# I'll be honest the class is not really necessary here
 	master = TheFatController(sys.argv[1])
