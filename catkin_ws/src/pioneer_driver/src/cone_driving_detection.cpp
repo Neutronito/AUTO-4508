@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "stereo_camera_testing/object_locations.h"
+#include "stereo_camera_testing/take_photo.h"
 #include "pioneer_driver/action_requests.h"
 #include "pioneer_driver/object_detection_finished.h"
 #include <time.h>
@@ -18,11 +19,14 @@ bool onAJob = false;
 bool currentlyPaused = false;
 bool deadman_pressed = false;
 
+bool banForwards = false;
+
 // State 0 indicates rotating on the stop to find a cone or bucket
 // State 1 indicates positioning and obtaining the distance of the cone
 // State 2 indicates positioning and obtaining the distance of a bucket
 int state = 0;
 int pseudoDelay = 0;
+int start_time;
 
 // Recording variables for cone
 float coneDistance = 0;
@@ -48,7 +52,7 @@ double rotatingStartTime;
 double timeToSpendRotating = 0;
 
 // Positioning stuff
-#define CENTRE_TOLERANCE 10
+#define CENTRE_TOLERANCE 20
 // Distance threshold is in M
 #define DISTANCE_THRESHOLD 2000.0
 #define CENTRE_DRIVING_THRESHOLD 100
@@ -60,9 +64,9 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
     if (msg->start_cone_detection) {
         onAJob = true;
         state = 0;
-        rotatedAmount = 0;
         coneFound = false;
         bucketFound = false;
+        banForwards = false;
         ROS_INFO("Starting a cone job");
     }
     // Deal with pausing
@@ -73,6 +77,7 @@ void received_command(const pioneer_driver::action_requests::ConstPtr& msg) {
         onAJob = false;
         ROS_INFO("Terminating cone job");
     }
+    rotatedAmount = 0;
 }
 
 // Gets the imu heading
@@ -119,11 +124,11 @@ int main(int argc, char **argv) {
     // Subscribe to imu to get our current heading
 	ros::Subscriber imu_subscriber = cone_handle.subscribe("imu_heading", 10, imu_heading_callback);
 
-    // Setup client for distance finding
+    // Setup client for distance finding - deprecated
     ros::ServiceClient distance_client = cone_handle.serviceClient<lidar_calcs::front_object_distance>("lidar_response_node/get_front_object_distance");
 
-    // Setup publishing for requesting an image to be taken
-    ros::Publisher photo_taker = cone_handle.advertise<std_msgs::Bool>("stereo_camera_node/image_request", 10);
+    // Setup client for requesting an image to be taken
+    ros::ServiceClient photo_taker = cone_handle.serviceClient<stereo_camera_testing::take_photo>("stereo_camera_testing/image_request");
     
     // Setup subscription to deadman topic
 	ros::Subscriber deadman_subscriber = cone_handle.subscribe("drive_values/deadman_state", 10, deadman_callback);
@@ -141,12 +146,14 @@ int main(int argc, char **argv) {
             // Rotating finding cone or bucket state~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             if (state == 0) {
 
+                linearVelocity = 0;
+
                 // Check if we have not found anything
                 if (rotatedAmount > 720) {
                     ROS_INFO("The cone node has rotated 720 degrees without finding anything, continuing to next waypoint");
                     onAJob = false;
                     pioneer_driver::object_detection_finished msg;
-                    msg.finished_job_successfully = true;
+                    msg.finished_job_successfully = false;
                     msg.bucket_cone_distance = 0;
                     finished_publisher.publish(msg);
                 }
@@ -156,39 +163,56 @@ int main(int argc, char **argv) {
                 stereo_camera_testing::object_locations camSrv;
                 camSrv.request.dummy_var = true;
                 angularVelocity = 0.3;
+
                 
                 // Check if we have found an object
                 if (camera_client.call(camSrv)) {
 
                     // Check if we have found a cone
-                        if (camSrv.response.found_cone && camSrv.response.cone_z > 0) {
-                            // check if we have found the cone already or not
-                            if (!coneFound) {
-                                ROS_INFO("A cone has been found, moving to state one");
-                                state = 1;
-                            } else if (coneFound && bucketFound) {
-                                state = 3;
-                                desiredOrientation = currentOrientation - 90;
-                                desiredOrientation = (desiredOrientation + 360) % 360;
-                                angularVelocity = 0.5;
-                                ROS_INFO("Re-found the cone, now rotate 90* to the left.");
-                            }
-                        } 
-                        
-                        // Check if we have foudn the bucket
-                        else if (camSrv.response.found_bucket && camSrv.response.bucket_z > 0) {
-                            // Only move to bucket state if the cone has been found, and a bucket hasnt been found
-                            if (coneFound && !bucketFound) {
-                                ROS_INFO("A bucket has been found, moving to state two");
-                                state = 2;
-                                pseudoDelay = 0;
-                            }
-                        } else {
-                            ROS_INFO("No object found, continuing rotation");
+                    if (camSrv.response.found_cone && camSrv.response.cone_z > 0) {
+                        // check if we have found the cone already or not
+                        if (!coneFound) {
+                            ROS_INFO("A cone has been found, moving to state one");
+                            state = 1;
+                        } else if (coneFound && bucketFound) {
+                            state = 3;
+                            rotatedAmount = 0;
+                            angularVelocity = 0.5;
+                            ROS_INFO("Re-found the cone, now rotate 90* to the left.");
+                        }
+                    } 
+                    
+                    // Check if we have foudn the bucket
+                    else if (camSrv.response.found_bucket && camSrv.response.bucket_z > 0) {
+                        // Only move to bucket state if the cone has been found, and a bucket hasnt been found
+                        if (coneFound && !bucketFound) {
+                            ROS_INFO("A bucket has been found, moving to state two");
+                            state = 2;
+                            pseudoDelay = 0;
                         }
                     } else {
-                        ROS_ERROR("Failed to call service object_locations");
+                        ROS_INFO("No object found, continuing rotation");
                     }
+                } else {
+                    ROS_ERROR("Failed to call service object_locations");
+                }
+
+                lidar_calcs::front_object_distance srv;
+                srv.request.dummy_var = true;
+                //Now check if an object is too close
+                if (distance_client.call(srv)) {
+                    if (srv.response.object_distance < 1.0) {
+                        ROS_INFO("Cone node is too close to an object, moving backwards for 0.5 seconds");
+                        angularVelocity = 0;
+                        linearVelocity = -0.5;
+                        state = 4;
+
+                        if (coneFound) banForwards = true;
+                        
+                    }
+                } else {
+                    ROS_ERROR("Failed to call lidar distance service");
+                }
 
                 takeAnImage = false; 
             } 
@@ -215,8 +239,8 @@ int main(int argc, char **argv) {
 
                                 coneDistance = camSrv.response.cone_z;
 
-                                if (coneDistance >  DISTANCE_THRESHOLD) {
-                                    linearVelocity = 0.5;
+                                if (coneDistance >  DISTANCE_THRESHOLD && !banForwards) {
+                                    linearVelocity = 0.3;
                                     ROS_INFO("Driving at cone, its current distanc is %f", coneDistance);
                                     pseudoDelay = 0;
                                 } else {
@@ -228,22 +252,34 @@ int main(int argc, char **argv) {
                                 if (abs(centre_offset) < CENTRE_TOLERANCE) {
                                     angularVelocity = 0;
                                     // Now check if the cone is close enough or not
-                                    if (coneDistance <  DISTANCE_THRESHOLD) {
-                                        // Update info internally
-                                        linearVelocity = 0;
-                                        coneDistance = coneDistance;
-                                        coneAngle = currentOrientation;
-                                        coneFound = true;
-                                        ROS_INFO("Found the cone and taken its photo, recording distance and moving on to bucket");
-                                        ROS_INFO("The cone distance was found to be %f", coneDistance);
+                                    if (coneDistance <  DISTANCE_THRESHOLD || banForwards) {
+                                        
+                                        // Time to take the photo, call the photo taking service
+                                        stereo_camera_testing::take_photo srv;
+                                        srv.request.dummy_var = true;
 
-                                        // Request image to be taken
-                                        std_msgs::Bool msg;
-                                        msg.data = true;
-                                        photo_taker.publish(msg);
+                                        if (photo_taker.call(srv)) {
+                                            
+                                            // This means we successfully took a photo
+                                            if (srv.response.photo_status) {
+                                                // Update info internally
+                                                linearVelocity = 0;
+                                                coneDistance = coneDistance;
+                                                coneAngle = currentOrientation;
+                                                coneFound = true;
+                                                ROS_INFO("Found the cone and taken its photo, recording distance and moving on to bucket");
+                                                ROS_INFO("The cone distance was found to be %f", coneDistance);
 
-                                        state = 0;
-                                        rotatedAmount = 0;
+                                                state = 0;
+                                                rotatedAmount = 0;
+                                            }
+                                            
+                                            // Photo taking failed, do nothing which means that we will try again next loop
+                                            else { }
+                                        }
+                                        else {
+                                            ROS_ERROR("Failed to call service stereo_camera_node/take_image");
+                                        }
                                     }
                                 }
 
@@ -267,6 +303,8 @@ int main(int argc, char **argv) {
                 stereo_camera_testing::object_locations camSrv;
                 camSrv.request.dummy_var = true;
 
+                linearVelocity = 0;
+
                 // Call the service to obtain the position of the cone
                 if (camera_client.call(camSrv)) {
                     int centre_offset = camSrv.response.bucket_x;
@@ -280,18 +318,28 @@ int main(int argc, char **argv) {
                         //Check if the cone is close enough to the centre or not
                         if (abs(centre_offset) < CENTRE_TOLERANCE) {
 
-                                // Update internal variables
-                                bucketDistance = camSrv.response.bucket_z;
-                                bucketAngle = currentOrientation;
-                                bucketFound = true;
-                                ROS_INFO("Found the bucket and taken its photo, recording distance and returning to state 0");
-                                state = 0;
-                                rotatedAmount;
+                            // Time to take the photo, call the photo taking service
+                            stereo_camera_testing::take_photo srv;
+                            srv.request.dummy_var = true;
 
-                                // Request image to be taken
-                                std_msgs::Bool msg;
-                                msg.data = true;
-                                photo_taker.publish(msg);
+                            if (photo_taker.call(srv)) {
+                                
+                                // This means we successfully took a photo
+                                if (srv.response.photo_status) {
+                                    // Update internal variables
+                                    bucketDistance = camSrv.response.bucket_z;
+                                    bucketAngle = currentOrientation;
+                                    bucketFound = true;
+                                    ROS_INFO("Found the bucket and taken its photo, recording distance and returning to state 0");
+                                    state = 0;
+                                    rotatedAmount;
+                                }
+                                // Photo taking failed, do nothing which means that we will try again next loop
+                                else { }
+                            }
+                            else {
+                                ROS_ERROR("Failed to call service stereo_camera_node/take_image");
+                            }
                         } 
                         
                         // Rotate until the bucket is centred
@@ -309,9 +357,8 @@ int main(int argc, char **argv) {
 
             else if (state == 3) {
                 // Check if we've rotated the 90*
-                // Doesnt work when desired is bigger than 270
-                if (desiredOrientation > 270) currentOrientation += 360;
-                if ((currentOrientation - desiredOrientation) < 0) {
+                linearVelocity = 0;
+                if (rotatedAmount > 90) {
                     angularVelocity = 0;
 
                     // Find the distance between the objects
@@ -335,6 +382,29 @@ int main(int argc, char **argv) {
                     onAJob = false;
 
                 } 
+            }
+
+            // Moving backwards away from an object that is too close to us
+            else if (state == 4) {
+                angularVelocity = 0;
+                lidar_calcs::front_object_distance srv;
+                srv.request.dummy_var = true;
+                //Now check if an object is too close
+                if (distance_client.call(srv)) {
+                    if (srv.response.object_distance > 1) {
+                        linearVelocity = 0;
+                        state = 0;
+                        rotatedAmount = 0;
+                    
+                        // If we've found a cone or bucket, throw it away, data is no longer valid as we have moved.
+                        coneFound = false;
+                        bucketFound = false;
+                        rotatedAmount = 0;
+                    }                
+                } else {
+                    ROS_ERROR("Failed to call lidar distance service");
+                }
+                    
             }
 
             // Publish the speeds to rosaria cmd_vel
