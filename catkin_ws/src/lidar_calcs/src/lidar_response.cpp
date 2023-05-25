@@ -14,8 +14,8 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     std_msgs::Int16 lidar_response;
     lidar_response.data = 0;
 
-    float thres_long = 3.f;          //threshold set to 3m
-    float thres_short = 1.f;         //threshold set to 1m
+    float thres_long = 1.5f;          //threshold set to 3m
+    float thres_short = 1.5f;         //threshold set to 1m
     int size = msg->ranges.size();
 
     //Start points for the 3 thirds of the lidar
@@ -49,7 +49,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     }
 
     //Short Range Avoidance Left 
-    for(int i = 0; i < mid; i++)
+    for(int i = (mid-(90/angle_increment)); i < mid; i++)
     {
         if(msg->ranges[i] < thres_short && msg->ranges[i] > 0.05)
         {
@@ -59,7 +59,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr& msg)
     }
 
     //Short Range Avoidance Right
-    for(int i = mid; i < size - 1; i++)
+    for(int i = mid; i < (mid+(90/angle_increment)); i++)
     {
         if(msg->ranges[i] < thres_short && msg->ranges[i] > 0.05)
         {
