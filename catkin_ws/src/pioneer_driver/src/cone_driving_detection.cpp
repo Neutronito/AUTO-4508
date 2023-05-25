@@ -174,6 +174,7 @@ int main(int argc, char **argv) {
                         if (!coneFound) {
                             ROS_INFO("A cone has been found, moving to state one");
                             state = 1;
+                            rotatedAmount = 0;
                         } else if (coneFound && bucketFound) {
                             state = 3;
                             rotatedAmount = 0;
@@ -189,6 +190,7 @@ int main(int argc, char **argv) {
                             ROS_INFO("A bucket has been found, moving to state two");
                             state = 2;
                             pseudoDelay = 0;
+                            rotatedAmount = 0;
                         }
                     } else {
                         ROS_INFO("No object found, continuing rotation");
